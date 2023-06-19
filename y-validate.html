@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>y-validate</title>
+	<style type="text/css">
+	body{font-family:arial;}
+	.container{width:1000px;margin:auto;}
+	</style>
+</head>
+<body dir="ltr">
+
+	<form class="container">
+		<h3>פונקציות</h3>
+		<table cellpadding="10">
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">y_add_error_msg( field, 'The message' );</td>
+				<td style="border-bottom:1px solid #ccc;">הוספת הודעה אחרי השדה</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">y_remove_error_msg( field );</td>
+				<td style="border-bottom:1px solid #ccc;">הסרת ההודעה אחרי השדה</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">y_blur_after_validate( field ){ //Do your thing };</td>
+				<td style="border-bottom:1px solid #ccc;">פונקציה שאפשר להוסיף אם רוצים לעבוד על השדה לאחר ולידציה</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">class=required</td>
+				<td style="border-bottom:1px solid #ccc;">שדה חובה</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">class=email</td>
+				<td style="border-bottom:1px solid #ccc;">ולדיציה לשדה אימייל</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">class=password-confirm</td>
+				<td style="border-bottom:1px solid #ccc;">סיסמאות תואמות (להוסיף את הקלאס לשני השדות)</td>
+			</tr>
+		</table>
+		<br/>
+		<h1>דוגמאות</h1>
+		<h3>class=required - שדה חובה</h3>
+		<input type="text" name="text" class="required" placeholder="שדה רגיל" />
+		
+		<h3>class=email - בדיקת שדה אימייל</h3>
+		<input type="email" name="email" class="required email" placeholder="שדה אימייל" />
+		
+		<h3>class=password-confirm - סיסמאות תואמות</h3>
+		<div>
+			<input type="password" name="password" class="required password-confirm" placeholder="סיסמה" />
+		</div>
+		<div>
+			<input type="password" name="confirm-password" class="required password-confirm" placeholder="אימות סיסמה" />
+		</div>
+	</form>
+	
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	<script type="text/javascript" src="y-validate.js"></script>
+	
+</body>
+</html>
