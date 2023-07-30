@@ -26,27 +26,59 @@
 				<td style="border-bottom:1px solid #ccc;">פונקציה שאפשר להוסיף אם רוצים לעבוד על השדה לאחר ולידציה</td>
 			</tr>
 			<tr>
-				<td style="border-bottom:1px solid #ccc;">class=required</td>
-				<td style="border-bottom:1px solid #ccc;">שדה חובה</td>
+				<td style="border-bottom:1px solid #ccc;">y_validate_form( form );</td>
+				<td style="border-bottom:1px solid #ccc;">
+					בדיקת שדות חובה<br/>
+					true/false מחזיר<br/>
+					form => div יכול להיות גם
+				</td>
 			</tr>
 			<tr>
-				<td style="border-bottom:1px solid #ccc;">class=email</td>
-				<td style="border-bottom:1px solid #ccc;">ולדיציה לשדה אימייל</td>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">required</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Required field</td>
 			</tr>
 			<tr>
-				<td style="border-bottom:1px solid #ccc;">class=password-confirm</td>
-				<td style="border-bottom:1px solid #ccc;">סיסמאות תואמות (להוסיף את הקלאס לשני השדות)</td>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">wpcf7-validates-as-required</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Required field - This class is from Wordpress <b>Contact Forms 7</b></td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">email</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Validate Email</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">type</span>="<span style="color:#8000FF;">email</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Validate Email</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">password-confirm</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Check matching passwords - Add this class to both fields</td>
 			</tr>
 		</table>
 		<br/>
-		<h1>דוגמאות</h1>
-		<h3>class=required - שדה חובה</h3>
+		<h1>Examples</h1>
+		<div>
+			<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">required</span>" OR <span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">wpcf7-validates-as-required</span>"
+		</div>
 		<input type="text" name="text" class="required" placeholder="שדה רגיל" />
-		
-		<h3>class=email - בדיקת שדה אימייל</h3>
+		<br/>
+		<br/>
+		<div>
+			<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">email</span>" OR <span style="color:#FF0000;">type</span>="<span style="color:#8000FF;">email</span>"
+		</div>
 		<input type="email" name="email" class="required email" placeholder="שדה אימייל" />
-		
-		<h3>class=password-confirm - סיסמאות תואמות</h3>
+		<br/>
+		<br/>
+		<div><span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">password-confirm</span>"</div>
 		<div>
 			<input type="password" name="password" class="required password-confirm" placeholder="סיסמה" />
 		</div>

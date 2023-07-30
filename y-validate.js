@@ -1,6 +1,6 @@
-/*! y-validate - v1 - 18/06/2023
+/*! y-validate - v1.1 - 30/07/2023
 * By Yuval Ashkenazi */
-jQuery('head').append('<style  type="text/css">input.error,textarea.error,select.error{color:red;border:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error{color:red;font-size:14px;}</style>');
+jQuery('head').append('<style  type="text/css">input.error,textarea.error,select.error{color:red;border:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.error + .wpcf7-not-valid-tip{display:none;}</style>');
 // Key up required
 jQuery('body').on('keyup','.required', function(){
 	y_validate_field( jQuery(this), 'keyup' );
@@ -30,7 +30,11 @@ jQuery('body').on('submit', 'form', function(e){
 // Validate form
 function y_validate_form( form ) {
 	var valid = true;
-	form.find('.required').each(function(){
+	var req = form.find('.required').length ? form.find('.required') : form.find('.wpcf7-validates-as-required');
+	if( ! req.length ) {
+		return valid;
+	}
+	req.each(function(){
 		var is_valid = y_validate_field( jQuery(this), 'submit' );
 		if( ! is_valid ) {
 			valid = false;
@@ -44,7 +48,7 @@ function y_validate_form( form ) {
 // Validate field
 function y_validate_field( field, function_type, callback ) {
 	// email
-	if( field.hasClass('email') && field.val() !== '' ) {
+	if( field.val() !== '' && ( field.attr('type') === 'email' || field.hasClass('email') ) ) {
 		if( /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( field.val() ) ) { 
 			y_remove_error_msg( field );
 			if( callback != undefined && callback != null ) {
@@ -79,9 +83,13 @@ function y_validate_field( field, function_type, callback ) {
 		}
 	}
 	// required
-	if( field.hasClass('required') && function_type !== 'blur' ) {
+	if( function_type !== 'blur' && ( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) ) {
 		if( field.val() === '' ) {
-			y_add_error_msg( field, 'Required field' );
+			if( field.siblings('.wpcf7-not-valid-tip').length ) {
+				y_remove_error_msg( field );
+			} else {
+				y_add_error_msg( field, 'Required field' );
+			}
 			return false;
 		} else if( field.hasClass('required') ) {
 			y_remove_error_msg( field );
