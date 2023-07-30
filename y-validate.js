@@ -84,14 +84,14 @@ function y_validate_field( field, function_type, callback ) {
 	}
 	// required
 	if( function_type !== 'blur' && ( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) ) {
-		if( field.val() === '' ) {
+		if( field.val() === '' || field.siblings('.wpcf7-not-valid-tip').length ) {
 			if( field.siblings('.wpcf7-not-valid-tip').length ) {
 				y_remove_error_msg( field );
 			} else {
 				y_add_error_msg( field, 'Required field' );
 			}
 			return false;
-		} else if( field.hasClass('required') ) {
+		} else if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) {
 			y_remove_error_msg( field );
 			if( callback != undefined && callback != null ) {
 				callback( field );
