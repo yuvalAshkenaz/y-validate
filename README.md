@@ -2,6 +2,12 @@
 validation
 
 <table cellpadding="10">
+	<tr>
+				<td style="border-bottom:1px solid #ccc;">
+					&#60;script src="y-validate.js<span style="color:blue;">?lang=he</span>"&#62;&#60;/script&#62;
+				</td>
+				<td style="border-bottom:1px solid #ccc;">add <b>lang=he</b> for Hebrew messages</td>
+			</tr>
 			<tr>
 				<td style="border-bottom:1px solid #ccc;">y_add_error_msg( field, 'The message' );</td>
 				<td style="border-bottom:1px solid #ccc;">Add a message after the field</td>
