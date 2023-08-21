@@ -1,12 +1,29 @@
-/*! y-validate - v1.1 - 30/07/2023
+/*! y-validate - v1.2 - 21/08/2023
 * By Yuval Ashkenazi */
-jQuery('head').append('<style  type="text/css">input.error,textarea.error,select.error{color:red;border:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.error + .wpcf7-not-valid-tip{display:none;}</style>');
+jQuery('head').append('<style  type="text/css">input.error,textarea.error,select.error{color:red;border:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
+
+var yUrl = new URL(document.currentScript.src);
+var yLang = yUrl.searchParams.get("lang");
+var y_translations = {
+	invalid_email: 'Invalid email',
+	passwords_not_match: 'Passwords not match',
+	required_field: 'Required field',
+};
+if(yLang == 'he' || yLang == 'he-IL'){
+	yLang = 'he';
+	y_translations = {
+		invalid_email: 'דוא"ל לא תקין',
+		passwords_not_match: 'הסיסמאות לא תואמות',
+		required_field: 'שדה חובה',
+	};
+}
+
 // Key up required
-jQuery('body').on('keyup','.required', function(){
+jQuery('body').on('keyup','.required, .wpcf7-validates-as-required', function(){
 	y_validate_field( jQuery(this), 'keyup' );
 });
 // Blur required
-jQuery('body').on('blur','.required', function(){
+jQuery('body').on('blur','.required, .wpcf7-validates-as-required', function(){
 	if( ! jQuery(this).hasClass('password-confirm') ) {
 		y_validate_field(jQuery(this), 'blur', function( field ) {
 			if( typeof y_blur_after_validate === 'function' ) {
@@ -56,7 +73,7 @@ function y_validate_field( field, function_type, callback ) {
 			}
 			return true;
 		} else {
-			y_add_error_msg( field, 'Invalid email' );
+			y_add_error_msg( field, y_translations.invalid_email );
 			return false;
 		};
 	}
@@ -71,7 +88,7 @@ function y_validate_field( field, function_type, callback ) {
 		});
 		if( not_empty > 1 ) {
 			if( field.val() !== confirm_fields.not( field ).val() ) {
-				y_add_error_msg( confirm_fields, 'Passwords not match' );
+				y_add_error_msg( confirm_fields, y_translations.passwords_not_match );
 				return false;
 			} else {
 				y_remove_error_msg( confirm_fields );
@@ -83,12 +100,12 @@ function y_validate_field( field, function_type, callback ) {
 		}
 	}
 	// required
-	if( function_type !== 'blur' && ( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) ) {
+	if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) {
 		if( field.val() === '' || field.siblings('.wpcf7-not-valid-tip').length ) {
 			if( field.siblings('.wpcf7-not-valid-tip').length ) {
 				y_remove_error_msg( field );
 			} else {
-				y_add_error_msg( field, 'Required field' );
+				y_add_error_msg( field, y_translations.required_field );
 			}
 			return false;
 		} else if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) {
@@ -107,8 +124,9 @@ function y_remove_error_msg( self ) {
 };
 // Add error message
 function y_add_error_msg( self, msg ) {
-	if( self.next('label.error').length )
+	if( self.next('label.error').length ) {
 		self.addClass('error').next('label.error').text( msg ).show();
-	else
+	} else {
 		self.addClass('error').after('<label class="error" style="display:block;">'+msg+'</label>');
+	}
 };
