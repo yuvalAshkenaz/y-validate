@@ -1,26 +1,43 @@
-/*! y-validate - v1.2 - 21/08/2023
+/*! y-validate - v1.3 - 19/06/2024
 * By Yuval Ashkenazi */
 jQuery('head').append('<style  type="text/css">input.error,textarea.error,select.error{color:red;border:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
 
 var yUrl = new URL(document.currentScript.src);
 var yLang = yUrl.searchParams.get("lang");
 var y_translations = {
-	invalid_email: 'Invalid email',
-	passwords_not_match: 'Passwords not match',
-	required_field: 'Required field',
+	invalid_email		: 'Invalid email',
+	passwords_not_match	: 'Passwords not match',
+	required_field		: 'Required field',
+	minimum				: 'Minimum',
+	letters				: 'letters',
+	numbers				: 'numbers',
+	numbers_only		: 'Numbers only'
 };
 if(yLang == 'he' || yLang == 'he-IL'){
 	yLang = 'he';
 	y_translations = {
-		invalid_email: 'דוא"ל לא תקין',
-		passwords_not_match: 'הסיסמאות לא תואמות',
-		required_field: 'שדה חובה',
+		invalid_email		: 'דוא"ל לא תקין',
+		passwords_not_match	: 'הסיסמאות לא תואמות',
+		required_field		: 'שדה חובה',
+		minimum				: 'מינימום',
+		letters				: 'אותיות',
+		numbers				: 'מספרים',
+		numbers_only		: 'מספרים בלבד'
 	};
 }
 
 // Key up required
 jQuery('body').on('keyup','.required, .wpcf7-validates-as-required', function(){
 	y_validate_field( jQuery(this), 'keyup' );
+});
+// Key up not required
+jQuery('body').on('keyup','[minlength], [type="tel"]', function(){
+	if( ! y_check_if_number( jQuery(this) ) ) {
+		return false;
+	}
+	if( ! y_check_minlength( jQuery(this) ) ) {
+		return false;
+	}
 });
 // Blur required
 jQuery('body').on('blur','.required, .wpcf7-validates-as-required', function(){
@@ -64,6 +81,13 @@ function y_validate_form( form ) {
 };
 // Validate field
 function y_validate_field( field, function_type, callback ) {
+	if( ! y_check_if_number( field ) ) {
+		return false;
+	}
+	if( ! y_check_minlength( field ) ) {
+		return false;
+	}
+	
 	// email
 	if( field.val() !== '' && ( field.attr('type') === 'email' || field.hasClass('email') ) ) {
 		if( /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( field.val() ) ) { 
@@ -118,6 +142,35 @@ function y_validate_field( field, function_type, callback ) {
 	}
 	return true;
 };
+//check if number field
+function y_check_if_number( field ) {
+	if( field.attr('type') == 'tel' && /[^0-9]/.test( field.val() ) ) {
+		y_add_error_msg( field, y_translations.numbers_only );
+		return false;
+	} else {
+		y_remove_error_msg( field );
+		return true;
+	}
+	return true;
+}
+//minlength
+function y_check_minlength( field ) {
+	if( field.attr('minlength') ) {
+		var min = field.attr('minlength');
+		if( field.val().length > 0 && field.val().length < min ) {
+			var min_word = y_translations.letters;
+			if( field.attr('type') == 'tel' ) {
+				min_word = y_translations.numbers;
+			}
+			y_add_error_msg( field, y_translations.minimum+' '+min+' '+min_word );
+			return false;
+		} else {
+			y_remove_error_msg( field );
+			return true;
+		}
+	}
+	return true;
+}
 // Remove error message
 function y_remove_error_msg( self ) {
 	self.removeClass('error').next('label.error').remove();
