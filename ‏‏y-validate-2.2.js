@@ -37,14 +37,6 @@ jQuery('body').on('keyup', '.required, .wpcf7-validates-as-required', function()
 jQuery('body').on('change', '.required, .wpcf7-validates-as-required', function(){
 	y_check_req( jQuery(this) );
 });
-//Select2
-jQuery(document).ready(function() {
-	if( typeof jQuery('.select2.required').eq(0).select2 === 'function' ) {
-		jQuery('.select2.required').on('select2:select', function(){
-			y_check_req( jQuery(this) );
-		});
-	}
-});
 // Key up digits
 jQuery('body').on('keyup', '[type="tel"]', function(){
 	y_check_if_number( jQuery(this) );
