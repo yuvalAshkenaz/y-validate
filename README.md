@@ -4,7 +4,7 @@ validation
 <table cellpadding="10">
 	<tr>
 				<td style="border-bottom:1px solid #ccc;">
-					&#60;script src="y-validate.js<span style="color:blue;">?lang=he</span>"&#62;&#60;/script&#62;
+					&#60;script src="y-validate-2.2.js<span style="color:blue;">?lang=he</span>"&#62;&#60;/script&#62;
 				</td>
 				<td style="border-bottom:1px solid #ccc;">add <b>lang=he</b> for Hebrew messages</td>
 			</tr>
