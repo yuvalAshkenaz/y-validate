@@ -46,6 +46,6 @@ validation
 			</tr>
 			<tr>
 				<td style="border-bottom:1px solid #ccc;">class="password-confirm"</td>
-				<td style="border-bottom:1px solid #ccc;">Confirm two passwords fields. You need to this class to both fields</td>
+				<td style="border-bottom:1px solid #ccc;">Confirm two passwords fields. You need to add this class to both fields</td>
 			</tr>
 		</table>
