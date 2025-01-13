@@ -1,4 +1,4 @@
-/*! y-validate - v2.3 - 06/01/2025
+/*! y-validate - v2.4 - 13/01/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
@@ -15,7 +15,7 @@ var y_translations = {
 	numbers_only		: 'Numbers only',
 	is					: 'is'
 };
-if(yLang == 'he' || yLang == 'he-IL'){
+if(yLang == 'he' || yLang == 'he-IL' || yLang == 'he_IL'){
 	yLang = 'he';
 	y_translations = {
 		invalid_email		: 'דוא"ל לא תקין',
