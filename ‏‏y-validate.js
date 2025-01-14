@@ -1,4 +1,4 @@
-/*! y-validate - v2.4 - 13/01/2025
+/*! y-validate - v2.4 - 14/01/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
@@ -31,11 +31,11 @@ if(yLang == 'he' || yLang == 'he-IL' || yLang == 'he_IL'){
 
 // Key up required
 jQuery('body').on('keyup', '.required, .wpcf7-validates-as-required', function(){
-	y_check_req( jQuery(this) );
+	y_check_req( jQuery(this), 'keyup - Row 34' );
 });
 // Key up required
 jQuery('body').on('change', '.required, .wpcf7-validates-as-required', function(){
-	y_check_req( jQuery(this) );
+	y_check_req( jQuery(this), 'on change - Row 38' );
 });
 // Key up digits
 jQuery('body').on('keyup', '[type="tel"]', function(){
@@ -47,7 +47,7 @@ jQuery('body').on('keyup','[minlength]', function(){
 });
 // Blur required
 jQuery('body').on('blur', '.required, .wpcf7-validates-as-required', function(){
-	y_check_req( jQuery(this) );
+	// y_check_req( jQuery(this), 'on blur - Row 50' );
 	if( ! jQuery(this).hasClass('password-confirm') ) {
 		y_validate_field(jQuery(this), 'blur', function( field ) {
 			if( typeof y_blur_after_validate === 'function' ) {
@@ -102,7 +102,7 @@ function get_placeholder( field ) {
 function y_validate_field( field, function_type, callback ) {
 
 	// required
-	if( ! y_check_req( field ) ) {
+	if( ! y_check_req( field, 'y_validate_field - Row 105 function_type = '+function_type ) ) {
 		if (callback && typeof callback === 'function') {
 			callback( field );
 		}
@@ -197,11 +197,16 @@ function y_password_confirm( field, callback ){
 	return true;
 };
 // Required
-function y_check_req( field, callback ){
-	if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') ) {
+function y_check_req( field, row, callback ) {
+	// console.log( row );
+	if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') || field.closest('.required').length || field.closest('.wpcf7-validates-as-required').length ) {
 		// radio / checkbox
 		var has_radio_or_checkbox = false;
 		var radio_or_checkbox_empty = true;
+		
+		if( ! field.attr('type') ) {
+			field = field.find('[type]');
+		}
 		if( field.attr('type') == 'radio' || field.attr('type') == 'checkbox' ) {
 			has_radio_or_checkbox = true;
 			jQuery('input[name="'+field.attr('name')+'"]').each(function(){
@@ -209,8 +214,10 @@ function y_check_req( field, callback ){
 					radio_or_checkbox_empty = false;
 				}
 			});
-			if( ! radio_or_checkbox_empty )
+			if( ! radio_or_checkbox_empty ) {
 				jQuery('input[name="'+field.attr('name')+'"]').removeClass('error').next('label.error').remove();
+				jQuery('input[name="'+field.attr('name')+'"]').closest('.wpcf7-validates-as-required').removeClass('error').next('label.error').remove();
+			}
 		}
 		if(
 			( has_radio_or_checkbox && radio_or_checkbox_empty ) || 
@@ -279,21 +286,54 @@ function y_check_minlength( field ) {
 }
 // Remove error message
 function y_remove_error_msg( self ) {
+	if( ! self.hasClass('.wpcf7-validates-as-required') && self.closest('.wpcf7-validates-as-required').length ) {
+		self = self.closest('.wpcf7-validates-as-required');
+	}
 	self.removeClass('error').next('label.error').remove();
 };
 // Add error message
 function y_add_error_msg( self, msg ) {
-	// debugger;
+	if( ! self.hasClass('.wpcf7-validates-as-required') && self.closest('.wpcf7-validates-as-required').length ) {
+		self = self.closest('.wpcf7-validates-as-required');
+	}
 	if( self.next('label.error').length ) {
 		self.addClass('error').next('label.error').text( msg ).show();
 	} else {
 		var forid = '';
-		if( self.attr('id') ) {
+		var inner_input = self.find('input');
+		if( inner_input.length ) {
+			if( ! inner_input.attr('id') ) {
+				var newID = y_new_input_id({
+					input: inner_input
+				});
+				inner_input.attr('id', newID);
+			}
+			forid = 'for="'+inner_input.attr('id')+'"';
+		} else {
+			if( ! self.attr('id') ) {
+				var newID = y_new_input_id({
+					input: self
+				});
+				self.attr('id', newID);
+			}
 			forid = 'for="'+self.attr('id')+'"';
 		}
 		self.addClass('error').after('<label '+forid+' class="error" style="display:block;">'+msg+'</label>');
 	}
 };
+function y_new_input_id( obj ){
+	var newID = obj.input.attr('name').replace(/[^a-zA-Z\-\_]/g, '');
+	var num = obj.num ? obj.num + 1 : 1;
+	newID = newID + num;
+	
+	if( jQuery('#' + newID).length ) {
+		y_new_input_id({
+			input: obj.input,
+			num: num
+		});
+	}
+	return newID;
+}
 //Disable cf7 validation
 document.addEventListener('wpcf7submit', function(event) {
 	event.detail.apiResponse.invalid_fields = [];
