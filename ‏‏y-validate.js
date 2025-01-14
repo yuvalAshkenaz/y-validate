@@ -1,4 +1,4 @@
-/*! y-validate - v2.4 - 14/01/2025
+/*! y-validate - v2.5 - 14/01/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
@@ -31,11 +31,11 @@ if(yLang == 'he' || yLang == 'he-IL' || yLang == 'he_IL'){
 
 // Key up required
 jQuery('body').on('keyup', '.required, .wpcf7-validates-as-required', function(){
-	y_check_req( jQuery(this), 'keyup - Row 34' );
+	y_check_req( jQuery(this) );
 });
-// Key up required
+// Change required
 jQuery('body').on('change', '.required, .wpcf7-validates-as-required', function(){
-	y_check_req( jQuery(this), 'on change - Row 38' );
+	y_check_req( jQuery(this) );
 });
 // Key up digits
 jQuery('body').on('keyup', '[type="tel"]', function(){
@@ -47,8 +47,9 @@ jQuery('body').on('keyup','[minlength]', function(){
 });
 // Blur required
 jQuery('body').on('blur', '.required, .wpcf7-validates-as-required', function(){
-	// y_check_req( jQuery(this), 'on blur - Row 50' );
-	if( ! jQuery(this).hasClass('password-confirm') ) {
+	if( jQuery(this).hasClass('password-confirm') ) {
+		y_check_req( jQuery(this) );
+	} else {
 		y_validate_field(jQuery(this), 'blur', function( field ) {
 			if( typeof y_blur_after_validate === 'function' ) {
 				y_blur_after_validate( field );
@@ -102,7 +103,7 @@ function get_placeholder( field ) {
 function y_validate_field( field, function_type, callback ) {
 
 	// required
-	if( ! y_check_req( field, 'y_validate_field - Row 105 function_type = '+function_type ) ) {
+	if( ! y_check_req( field ) ) {
 		if (callback && typeof callback === 'function') {
 			callback( field );
 		}
@@ -197,8 +198,7 @@ function y_password_confirm( field, callback ){
 	return true;
 };
 // Required
-function y_check_req( field, row, callback ) {
-	// console.log( row );
+function y_check_req( field, callback ) {
 	if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') || field.closest('.required').length || field.closest('.wpcf7-validates-as-required').length ) {
 		// radio / checkbox
 		var has_radio_or_checkbox = false;
