@@ -1,4 +1,4 @@
-/*! y-validate - v2.5 - 14/01/2025
+/*! y-validate - v2.6 - 26/02/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
@@ -141,6 +141,7 @@ function y_validate_field( field, function_type, callback ) {
 		}
 		return false;
 	}
+	return true;
 };
 // Email
 function y_check_email( field, callback ){
