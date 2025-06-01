@@ -5,7 +5,7 @@
 	<title>y-validate</title>
 	<style type="text/css">
 	body{font-family:arial;}
-	.container{width:1180px;margin:auto;}
+	.container{width:1180px;margin:auto;padding:50px;}
 	</style>
 </head>
 <body dir="ltr">
@@ -55,13 +55,19 @@
 				<td style="border-bottom:1px solid #ccc;">
 					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">email</span>"
 				</td>
-				<td style="border-bottom:1px solid #ccc;">Validate Email</td>
+				<td style="border-bottom:1px solid #ccc;">Validates Email</td>
 			</tr>
 			<tr>
 				<td style="border-bottom:1px solid #ccc;">
 					<span style="color:#FF0000;">type</span>="<span style="color:#8000FF;">email</span>"
 				</td>
-				<td style="border-bottom:1px solid #ccc;">Validate Email</td>
+				<td style="border-bottom:1px solid #ccc;">Validates Email</td>
+			</tr>
+			<tr>
+				<td style="border-bottom:1px solid #ccc;">
+					<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">cell</span>"
+				</td>
+				<td style="border-bottom:1px solid #ccc;">Validates cellphone</td>
 			</tr>
 			<tr>
 				<td style="border-bottom:1px solid #ccc;">
@@ -75,13 +81,19 @@
 		<div>
 			<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">required</span>" OR <span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">wpcf7-validates-as-required</span>"
 		</div>
-		<input type="text" name="text" class="required" placeholder="שדה רגיל" />
+		<input type="text" name="text" class="required" placeholder="שם פרטי" />
 		<br/>
 		<br/>
 		<div>
 			<span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">email</span>" OR <span style="color:#FF0000;">type</span>="<span style="color:#8000FF;">email</span>"
 		</div>
-		<input type="email" name="email" class="required email" placeholder="שדה אימייל" />
+		<input type="email" name="email" class="required email" placeholder="אימייל" />
+		<br/>
+		<br/>
+		<input type="tel" name="phone" class="required" placeholder="טלפון" />
+		<br/>
+		<br/>
+		<input type="tel" name="cell" class="cell" placeholder="נייד" />
 		<br/>
 		<br/>
 		<div><span style="color:#FF0000;">class</span>="<span style="color:#8000FF;">password-confirm</span>"</div>
@@ -94,7 +106,7 @@
 	</form>
 	
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-	<script type="text/javascript" src="y-validate.js"></script>
+	<script type="text/javascript" src="y-validate.js?lang=he"></script>
 	
 </body>
 </html>

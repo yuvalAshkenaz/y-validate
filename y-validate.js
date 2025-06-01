@@ -1,4 +1,4 @@
-/*! y-validate - v2.6 - 26/02/2025
+/*! y-validate - v2.7 - 01/06/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
@@ -6,6 +6,7 @@ jQuery('head').append('<style type="text/css">input.error,textarea.error,select.
 var yUrl = new URL(document.currentScript.src);
 var yLang = yUrl.searchParams.get("lang");
 var y_translations = {
+	cell				: 'Invalid mobile number',
 	invalid_email		: 'Invalid email',
 	passwords_not_match	: 'Passwords not match',
 	required_field		: 'Required field',
@@ -18,6 +19,7 @@ var y_translations = {
 if(yLang == 'he' || yLang == 'he-IL' || yLang == 'he_IL'){
 	yLang = 'he';
 	y_translations = {
+		cell				: 'מספר טלפון נייד לא תקין',
 		invalid_email		: 'דוא"ל לא תקין',
 		passwords_not_match	: 'הסיסמאות לא תואמות',
 		required_field		: 'שדה חובה',
@@ -40,6 +42,10 @@ jQuery('body').on('change', '.required, .wpcf7-validates-as-required', function(
 // Key up digits
 jQuery('body').on('keyup', '[type="tel"]', function(){
 	y_check_if_number( jQuery(this) );
+});
+// Key up cell
+jQuery('body').on('keyup', '.cell', function(){
+	isIsraeliMobileNumber( jQuery(this) );
 });
 // Key up minlength
 jQuery('body').on('keyup','[minlength]', function(){
@@ -70,6 +76,10 @@ jQuery('body').on('blur', '[type="email"]', function(){
 // Blur digits
 jQuery('body').on('blur', '[type="tel"]', function(){
 	y_check_if_number( jQuery(this) );
+});
+// Blur cell
+jQuery('body').on('blur', '.cell', function(){
+	isIsraeliMobileNumber( jQuery(this) );
 });
 // Submit form
 jQuery('body').on('submit', 'form', function(e){
@@ -112,6 +122,14 @@ function y_validate_field( field, function_type, callback ) {
 	
 	// digits
 	if( ! y_check_if_number( field ) ) {
+		if (callback && typeof callback === 'function') {
+			callback( field );
+		}
+		return false;
+	}
+	
+	// cell
+	if( ! isIsraeliMobileNumber( field ) ) {
 		if (callback && typeof callback === 'function') {
 			callback( field );
 		}
@@ -335,6 +353,28 @@ function y_new_input_id( obj ){
 	}
 	return newID;
 }
+// is Israeli Mobile Number
+function isIsraeliMobileNumber(field) {
+    phone_val = field.val().replace(/\D/g, '');
+
+    if ( phone_val.startsWith('972') ) {
+        phone_val = '0' + phone_val.slice(3);
+    }
+	
+	if( phone_val.length && field.hasClass('cell') && ! /^05[0-9]{8}$/.test( phone_val ) ) {
+		var msg = y_translations.cell;
+		var placeholder = get_placeholder( field );
+		if( placeholder ) {
+			msg = placeholder + ': ' + msg;
+		}
+		y_add_error_msg( field, msg );
+		return false;
+	} else {
+		y_remove_error_msg( field );
+	}
+	return true;
+}
+
 //Disable cf7 validation
 document.addEventListener('wpcf7submit', function(event) {
 	event.detail.apiResponse.invalid_fields = [];
