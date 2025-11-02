@@ -1,7 +1,23 @@
-/*! y-validate - v2.7 - 01/06/2025
+/*! y-validate - v2.8 - 02/11/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
-jQuery('head').append('<style type="text/css">input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}.error::-webkit-input-placeholder{color:red!important;opacity:1;}.error:-moz-placeholder{color:red!important;opacity:1;}.select2-wrap{position:relative;}.select2.error+label.error{position:absolute;bottom:0;}.select2.error~.select2-container{margin-bottom:24px;}.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}label.error,.wpcf7-not-valid-tip{color:red;font-size:14px;}label.wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, label.error ~ .wpcf7-not-valid-tip{display:none;}</style>');
+jQuery('head').append(
+	'<style type="text/css">\
+	input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}\
+	.error::-webkit-input-placeholder{color:red!important;opacity:1;}\
+	.error:-moz-placeholder{color:red!important;opacity:1;}\
+	.select2-wrap{position:relative;}\
+	.select2.error+.label-error{position:absolute;bottom:0;}\
+	.select2.error~.select2-container{margin-bottom:24px;}\
+	.select2.error~.select2-container .select2-selection{border-bottom-color:red;}.select2.error~.select2-container .select2-selection__rendered{color:red;}input[type="checkbox"].error~span{color:red;}\
+	.label-error,.wpcf7-not-valid-tip{color:red;font-size:14px;}\
+	label:not(.label-error).wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip,.label-error ~ .wpcf7-not-valid-tip{display:none;}\
+	.wpcf7-checkbox label:not(.label-error){display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}\
+	.label-error{width:100%;order:2;}\
+	.wpcf7-checkbox input{margin:0;}\
+	.wpcf7-checkbox .wpcf7-list-item-label{width:-webkit-calc(100% - 30px);width:calc(100% - 30px);}\
+	</style>'
+);
 
 var yUrl = new URL(document.currentScript.src);
 var yLang = yUrl.searchParams.get("lang");
@@ -234,8 +250,8 @@ function y_check_req( field, callback ) {
 				}
 			});
 			if( ! radio_or_checkbox_empty ) {
-				jQuery('input[name="'+field.attr('name')+'"]').removeClass('error').next('label.error').remove();
-				jQuery('input[name="'+field.attr('name')+'"]').closest('.wpcf7-validates-as-required').removeClass('error').next('label.error').remove();
+				jQuery('input[name="'+field.attr('name')+'"]').removeClass('error').next('.label-error').remove();
+				jQuery('input[name="'+field.attr('name')+'"]').closest('.wpcf7-validates-as-required').removeClass('error').next('.label-error').remove();
 			}
 		}
 		if(
@@ -308,15 +324,15 @@ function y_remove_error_msg( self ) {
 	if( ! self.hasClass('.wpcf7-validates-as-required') && self.closest('.wpcf7-validates-as-required').length ) {
 		self = self.closest('.wpcf7-validates-as-required');
 	}
-	self.removeClass('error').next('label.error').remove();
+	self.removeClass('error').next('.label-error').remove();
 };
 // Add error message
 function y_add_error_msg( self, msg ) {
 	if( ! self.hasClass('.wpcf7-validates-as-required') && self.closest('.wpcf7-validates-as-required').length ) {
 		self = self.closest('.wpcf7-validates-as-required');
 	}
-	if( self.next('label.error').length ) {
-		self.addClass('error').next('label.error').text( msg ).show();
+	if( self.next('.label-error').length ) {
+		self.addClass('error').next('.label-error').text( msg ).show();
 	} else {
 		var forid = '';
 		var inner_input = self.find('input');
@@ -337,7 +353,10 @@ function y_add_error_msg( self, msg ) {
 			}
 			forid = 'for="'+self.attr('id')+'"';
 		}
-		self.addClass('error').after('<label '+forid+' class="error" style="display:block;">'+msg+'</label>');
+		if( self.closest('label').length )
+			self.addClass('error').after('<div '+forid+' class="label-error error" style="display:block;">'+msg+'</div>');
+		else
+			self.addClass('error').after('<label '+forid+' class="label-error error" style="display:block;">'+msg+'</label>');
 	}
 };
 function y_new_input_id( obj ){
