@@ -1,4 +1,4 @@
-# y-validate 2.7
+# y-validate 2.8
 validation
 
 <table cellpadding="10">
