@@ -1,4 +1,4 @@
-/*! y-validate - v2.8 - 02/11/2025
+/*! y-validate - v2.9 - 25/12/2025
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 jQuery('head').append(
@@ -19,9 +19,9 @@ jQuery('head').append(
 	</style>'
 );
 
-var yUrl = new URL(document.currentScript.src);
-var yLang = yUrl.searchParams.get("lang");
-var y_translations = {
+let yValidateUrl = new URL(document.currentScript.src);
+let yLang = yValidateUrl.searchParams.get("lang");
+let y_translations = {
 	cell				: 'Invalid mobile number',
 	invalid_email		: 'Invalid email',
 	passwords_not_match	: 'Passwords not match',
@@ -99,20 +99,20 @@ jQuery('body').on('blur', '.cell', function(){
 });
 // Submit form
 jQuery('body').on('submit', 'form', function(e){
-	var valid = y_validate_form( jQuery(this) );
+	let valid = y_validate_form( jQuery(this) );
 	if( ! valid ) {
 		e.preventDefault();
 	}
 });
 // Validate form
 function y_validate_form( form ) {
-	var valid = true;
-	var req = form.find('.required').length ? form.find('.required') : form.find('.wpcf7-validates-as-required');
+	let valid = true;
+	let req = form.find('.required').length ? form.find('.required') : form.find('.wpcf7-validates-as-required');
 	if( ! req.length ) {
 		return valid;
 	}
 	req.each(function(){
-		var is_valid = y_validate_field( jQuery(this), 'submit' );
+		let is_valid = y_validate_field( jQuery(this), 'submit' );
 		if( ! is_valid ) {
 			valid = false;
 		}
@@ -184,8 +184,8 @@ function y_check_email( field, callback ){
 			y_remove_error_msg( field );
 			// return true;
 		} else {
-			var msg = y_translations.invalid_email;
-			var placeholder = get_placeholder( field );
+			let msg = y_translations.invalid_email;
+			let placeholder = get_placeholder( field );
 			if( placeholder ) {
 				msg = placeholder + ': ' + msg;
 			}
@@ -206,8 +206,8 @@ function y_check_email( field, callback ){
 // password-confirm
 function y_password_confirm( field, callback ){
 	if( field.hasClass('password-confirm') ) {
-		var confirm_fields = field.closest('form').find('.password-confirm');
-		var not_empty = 0;
+		let confirm_fields = field.closest('form').find('.password-confirm');
+		let not_empty = 0;
 		confirm_fields.each(function(i){
 			if( jQuery(this).val().length ) {
 				not_empty++;
@@ -236,8 +236,8 @@ function y_password_confirm( field, callback ){
 function y_check_req( field, callback ) {
 	if( field.hasClass('required') || field.hasClass('wpcf7-validates-as-required') || field.closest('.required').length || field.closest('.wpcf7-validates-as-required').length ) {
 		// radio / checkbox
-		var has_radio_or_checkbox = false;
-		var radio_or_checkbox_empty = true;
+		let has_radio_or_checkbox = false;
+		let radio_or_checkbox_empty = true;
 		
 		if( ! field.attr('type') ) {
 			field = field.find('[type]');
@@ -262,8 +262,8 @@ function y_check_req( field, callback ) {
 			if( field.siblings('.wpcf7-not-valid-tip').length ) {
 				y_remove_error_msg( field );
 			} else {
-				var msg = y_translations.required_field;
-				var placeholder = get_placeholder( field );
+				let msg = y_translations.required_field;
+				let placeholder = get_placeholder( field );
 				if( placeholder ) {
 					msg = placeholder + ' ' + y_translations.is + ' ' + msg;
 				}
@@ -285,8 +285,8 @@ function y_check_req( field, callback ) {
 // Number
 function y_check_if_number( field ) {
 	if( field.attr('type') == 'tel' && /[^0-9]/.test( field.val() ) ) {
-		var msg = y_translations.numbers_only;
-		var placeholder = get_placeholder( field );
+		let msg = y_translations.numbers_only;
+		let placeholder = get_placeholder( field );
 		if( placeholder ) {
 			msg = placeholder + ': ' + msg;
 		}
@@ -300,14 +300,14 @@ function y_check_if_number( field ) {
 // minlength
 function y_check_minlength( field ) {
 	if( field.attr('minlength') ) {
-		var min = field.attr('minlength');
+		let min = field.attr('minlength');
 		if( field.val().length > 0 && field.val().length < min ) {
-			var min_word = y_translations.letters;
+			let min_word = y_translations.letters;
 			if( field.attr('type') == 'tel' ) {
 				min_word = y_translations.numbers;
 			}
-			var msg = y_translations.minimum + ' ' + min + ' ' + min_word;
-			var placeholder = get_placeholder( field );
+			let msg = y_translations.minimum + ' ' + min + ' ' + min_word;
+			let placeholder = get_placeholder( field );
 			if( placeholder ) {
 				msg = placeholder + ': ' + msg;
 			}
@@ -334,11 +334,11 @@ function y_add_error_msg( self, msg ) {
 	if( self.next('.label-error').length ) {
 		self.addClass('error').next('.label-error').text( msg ).show();
 	} else {
-		var forid = '';
-		var inner_input = self.find('input');
+		let forid = '';
+		let inner_input = self.find('input');
 		if( inner_input.length ) {
 			if( ! inner_input.attr('id') ) {
-				var newID = y_new_input_id({
+				let newID = y_new_input_id({
 					input: inner_input
 				});
 				inner_input.attr('id', newID);
@@ -346,7 +346,7 @@ function y_add_error_msg( self, msg ) {
 			forid = 'for="'+inner_input.attr('id')+'"';
 		} else {
 			if( ! self.attr('id') ) {
-				var newID = y_new_input_id({
+				let newID = y_new_input_id({
 					input: self
 				});
 				self.attr('id', newID);
@@ -360,8 +360,8 @@ function y_add_error_msg( self, msg ) {
 	}
 };
 function y_new_input_id( obj ){
-	var newID = obj.input.attr('name').replace(/[^a-zA-Z\-\_]/g, '');
-	var num = obj.num ? obj.num + 1 : 1;
+	let newID = obj.input.attr('name').replace(/[^a-zA-Z\-\_]/g, '');
+	let num = obj.num ? obj.num + 1 : 1;
 	newID = newID + num;
 	
 	if( jQuery('#' + newID).length ) {
@@ -381,8 +381,8 @@ function isIsraeliMobileNumber(field) {
     }
 	
 	if( phone_val.length && field.hasClass('cell') && ! /^05[0-9]{8}$/.test( phone_val ) ) {
-		var msg = y_translations.cell;
-		var placeholder = get_placeholder( field );
+		let msg = y_translations.cell;
+		let placeholder = get_placeholder( field );
 		if( placeholder ) {
 			msg = placeholder + ': ' + msg;
 		}
