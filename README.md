@@ -68,32 +68,3 @@ Simply include the script in your HTML file (preferably in the footer or head).
 
 Hooks & Callbacks
 You can define this function in your code to execute custom logic immediately after a field loses focus (blur) and validation runs.
-
-function y_blur_after_validate( field ) {
-    // Example: log the field that was just validated
-    console.log('Field validated:', field);
-    
-    // You can add custom logic here
-    if ( field.classList.contains('error') ) {
-        console.log('Field has error!');
-    }
-}
-
-📝 Example
-<form id="myForm">
-    <input type="text" name="name" class="required" placeholder="Full Name">
-    
-    <input type="email" name="email" class="required" placeholder="Email Address">
-    
-    <input type="tel" name="phone" class="cell" placeholder="Mobile Phone">
-
-    <input type="password" name="pass" class="required password-confirm" placeholder="Password">
-    <input type="password" name="pass2" class="required password-confirm" placeholder="Confirm Password">
-
-    <button type="submit">Submit</button>
-</form>
-
-<script src="y-validate.js"></script>
-
-📄 License
-MIT
