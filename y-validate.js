@@ -1,4 +1,4 @@
-/*! y-validate - v3.0 - 14/01/2026
+/*! y-validate - v3.1 - 05/02/2026
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 
@@ -23,7 +23,16 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// URL and Language Setup
+// Helper: Debounce function to improve INP
+function y_debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Translations Setup
 const yValidateUrl = new URL(document.currentScript.src);
 let yLang = yValidateUrl.searchParams.get("lang");
 let y_translations = {
@@ -53,13 +62,12 @@ if (yLang === 'he' || yLang === 'he-IL' || yLang === 'he_IL') {
     };
 }
 
-// Event Delegation Helpers
 function matches(el, selector) {
     return el.matches && el.matches(selector);
 }
 
-// Event Listeners
-document.body.addEventListener('keyup', function(e) {
+// Optimized Event Listener for Input (Replaces keyup)
+const handleInputValidation = y_debounce(function(e) {
     if (matches(e.target, '.required, .wpcf7-validates-as-required')) {
         y_check_req(e.target);
     } else if (matches(e.target, '[type="tel"]')) {
@@ -69,7 +77,9 @@ document.body.addEventListener('keyup', function(e) {
     } else if (matches(e.target, '[minlength]')) {
         y_check_minlength(e.target);
     }
-});
+}, 300); // 300ms delay to unblock main thread
+
+document.body.addEventListener('input', handleInputValidation);
 
 document.body.addEventListener('change', function(e) {
     if (matches(e.target, '.required, .wpcf7-validates-as-required')) {
@@ -77,6 +87,7 @@ document.body.addEventListener('change', function(e) {
     }
 });
 
+// Blur uses passive: true to not block scrolling (though blur doesn't usually block scroll)
 document.body.addEventListener('blur', function(e) {
     const target = e.target;
     if (matches(target, '.required, .wpcf7-validates-as-required')) {
@@ -100,7 +111,7 @@ document.body.addEventListener('blur', function(e) {
     } else if (matches(target, '.cell')) {
         isIsraeliMobileNumber(target);
     }
-}, true); // useCapture for blur to work with delegation correctly if needed, though 'focusout' bubbles, 'blur' does not. Delegated 'blur' works on window/document in modern browsers, but explicit target check is safer.
+}, true);
 
 document.body.addEventListener('submit', function(e) {
     if (e.target.tagName === 'FORM') {
@@ -111,29 +122,21 @@ document.body.addEventListener('submit', function(e) {
     }
 });
 
-// Validate form
+// --- Validation Functions (Same logic, cleaner implementation) ---
+
 function y_validate_form(form) {
     let valid = true;
-    // Query selectors returns NodeList, convert to Array or use forEach
     let req = form.querySelectorAll('.required, .wpcf7-validates-as-required');
-    
-    if (req.length === 0) {
-        return valid;
-    }
+    if (req.length === 0) return valid;
 
     req.forEach(function(field) {
-        // Filter out if it picked up something erroneously (though querySelectorAll is precise)
         const isValid = y_validate_field(field, 'submit');
-        if (!isValid) {
-            valid = false;
-        }
+        if (!isValid) valid = false;
     });
 
     if (!valid) {
         const firstError = form.querySelector('.error');
-        if (firstError) {
-            firstError.focus();
-        }
+        if (firstError) firstError.focus();
     }
     return valid;
 }
@@ -142,324 +145,196 @@ function get_placeholder(field) {
     return field.getAttribute('placeholder') || field.getAttribute('data-default-placeholder');
 }
 
-// Validate field
 function y_validate_field(field, function_type, callback) {
-    // Ensure field is a DOM element
     if (!field) return false;
+    // Chain validation checks
+    if (!y_check_req(field)) return runCallback(field, callback, false);
+    if (!y_check_if_number(field)) return runCallback(field, callback, false);
+    if (!isIsraeliMobileNumber(field)) return runCallback(field, callback, false);
+    if (!y_check_email(field)) return runCallback(field, callback, false);
+    if (!y_check_minlength(field)) return runCallback(field, callback, false);
+    if (!y_password_confirm(field)) return runCallback(field, callback, false);
 
-    // required
-    if (!y_check_req(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    // digits
-    if (!y_check_if_number(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    // cell
-    if (!isIsraeliMobileNumber(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    // email
-    if (!y_check_email(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    // minlength
-    if (!y_check_minlength(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    // password-confirm
-    if (!y_password_confirm(field)) {
-        if (callback && typeof callback === 'function') callback(field);
-        return false;
-    }
-
-    return true;
+    return runCallback(field, callback, true);
 }
 
-// Email
-function y_check_email(field, callback) {
+function runCallback(field, callback, result) {
+    if (callback && typeof callback === 'function') callback(field);
+    return result;
+}
+
+function y_check_email(field) {
     if (field.value !== '' && (field.getAttribute('type') === 'email' || field.classList.contains('email'))) {
         if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
             y_remove_error_msg(field);
         } else {
             let msg = y_translations.invalid_email;
             const placeholder = get_placeholder(field);
-            if (placeholder) {
-                msg = placeholder + ': ' + msg;
-            }
+            if (placeholder) msg = placeholder + ': ' + msg;
             y_add_error_msg(field, msg);
-
-            if (callback && typeof callback === 'function') callback(field);
             return false;
         }
     }
-    if (callback && typeof callback === 'function') callback(field);
     return true;
 }
 
-// password-confirm
-function y_password_confirm(field, callback) {
+function y_password_confirm(field) {
     if (field.classList.contains('password-confirm')) {
         const form = field.closest('form');
         const confirm_fields = form.querySelectorAll('.password-confirm');
-        let not_empty = 0;
-        
-        confirm_fields.forEach(function(el) {
-            if (el.value.length) {
-                not_empty++;
-            }
-        });
+        let filled = 0;
+        confirm_fields.forEach(el => { if(el.value.length) filled++; });
 
-        if (not_empty > 1) {
-            // Find the other field to compare against
+        if (filled > 1) {
             let otherField = null;
-            confirm_fields.forEach(el => {
-                if(el !== field) otherField = el;
-            });
+            confirm_fields.forEach(el => { if(el !== field) otherField = el; });
 
             if (otherField && field.value !== otherField.value) {
-                // Add error to all confirm fields
                 confirm_fields.forEach(el => y_add_error_msg(el, y_translations.passwords_not_match));
-                
-                if (callback && typeof callback === 'function') callback(field);
                 return false;
             } else {
                 confirm_fields.forEach(el => y_remove_error_msg(el));
             }
         }
     }
-    if (callback && typeof callback === 'function') callback(field);
     return true;
 }
 
-// Required
-function y_check_req(field, callback) {
-    // Check if element itself is required or is inside a required wrapper
+function y_check_req(field) {
     const isRequired = field.classList.contains('required') || 
                        field.classList.contains('wpcf7-validates-as-required') || 
                        field.closest('.required') || 
                        field.closest('.wpcf7-validates-as-required');
 
     if (isRequired) {
-        // radio / checkbox logic
-        let has_radio_or_checkbox = false;
-        let radio_or_checkbox_empty = true;
         let targetField = field;
-
         if (!targetField.getAttribute('type')) {
             const innerInput = targetField.querySelector('[type]');
             if (innerInput) targetField = innerInput;
         }
-
+        
         const type = targetField.getAttribute('type');
+        let radioCheckboxEmpty = false;
 
         if (type === 'radio' || type === 'checkbox') {
-            has_radio_or_checkbox = true;
             const name = targetField.getAttribute('name');
             const inputs = document.querySelectorAll(`input[name="${name}"]`);
+            radioCheckboxEmpty = !Array.from(inputs).some(i => i.checked);
             
-            inputs.forEach(function(input) {
-                if (input.checked) {
-                    radio_or_checkbox_empty = false;
-                }
-            });
-
-            if (!radio_or_checkbox_empty) {
-                inputs.forEach(function(input) {
+            if (!radioCheckboxEmpty) {
+                 inputs.forEach(input => {
                     input.classList.remove('error');
-                    const labelError = input.nextElementSibling;
-                    if (labelError && labelError.classList.contains('label-error')) {
-                        labelError.remove();
-                    }
-                    
-                    const wrapper = input.closest('.wpcf7-validates-as-required');
-                    if (wrapper) {
-                        wrapper.classList.remove('error');
-                        const wrapperLabelError = wrapper.nextElementSibling;
-                        if (wrapperLabelError && wrapperLabelError.classList.contains('label-error')) {
-                            wrapperLabelError.remove();
-                        }
-                    }
-                });
+                    // Remove label errors safely
+                    const sibling = input.nextElementSibling;
+                    if(sibling && sibling.classList.contains('label-error')) sibling.remove();
+                 });
             }
         }
 
-        // Check for siblings with wpcf7 error tip
         let hasSiblingError = false;
         if (targetField.parentNode) {
-            const siblings = targetField.parentNode.children;
-            for (let i = 0; i < siblings.length; i++) {
-                if (siblings[i] !== targetField && siblings[i].classList.contains('wpcf7-not-valid-tip')) {
-                    hasSiblingError = true;
-                    break;
-                }
-            }
+            hasSiblingError = Array.from(targetField.parentNode.children).some(
+                child => child !== targetField && child.classList.contains('wpcf7-not-valid-tip')
+            );
         }
 
-        if (
-            (has_radio_or_checkbox && radio_or_checkbox_empty) ||
-            targetField.value === '' ||
-            hasSiblingError
-        ) {
-            if (hasSiblingError) {
-                y_remove_error_msg(targetField);
-            } else {
+        if (radioCheckboxEmpty || targetField.value.trim() === '' || hasSiblingError) {
+            if (!hasSiblingError) {
                 let msg = y_translations.required_field;
                 const placeholder = get_placeholder(targetField);
-                if (placeholder) {
-                    msg = placeholder + ' ' + y_translations.is + ' ' + msg;
-                }
+                if (placeholder) msg = placeholder + ' ' + y_translations.is + ' ' + msg;
                 y_add_error_msg(targetField, msg);
             }
-            if (callback && typeof callback === 'function') callback(targetField);
             return false;
-        } else if (targetField.classList.contains('required') || targetField.classList.contains('wpcf7-validates-as-required')) {
+        } else {
             y_remove_error_msg(targetField);
         }
     }
-    if (callback && typeof callback === 'function') callback(field);
     return true;
 }
 
-// Number
 function y_check_if_number(field) {
     if (field.getAttribute('type') === 'tel' && /[^0-9]/.test(field.value)) {
         let msg = y_translations.numbers_only;
         const placeholder = get_placeholder(field);
-        if (placeholder) {
-            msg = placeholder + ': ' + msg;
-        }
+        if (placeholder) msg = placeholder + ': ' + msg;
         y_add_error_msg(field, msg);
         return false;
-    } else {
+    }
+    y_remove_error_msg(field);
+    return true;
+}
+
+function y_check_minlength(field) {
+    if (field.hasAttribute('minlength')) {
+        const min = parseInt(field.getAttribute('minlength'), 10);
+        if (field.value.length > 0 && field.value.length < min) {
+            let min_word = (field.getAttribute('type') === 'tel') ? y_translations.numbers : y_translations.letters;
+            let msg = y_translations.minimum + ' ' + min + ' ' + min_word;
+            const placeholder = get_placeholder(field);
+            if (placeholder) msg = placeholder + ': ' + msg;
+            y_add_error_msg(field, msg);
+            return false;
+        }
         y_remove_error_msg(field);
     }
     return true;
 }
 
-// minlength
-function y_check_minlength(field) {
-    if (field.hasAttribute('minlength')) {
-        const min = parseInt(field.getAttribute('minlength'), 10);
-        if (field.value.length > 0 && field.value.length < min) {
-            let min_word = y_translations.letters;
-            if (field.getAttribute('type') === 'tel') {
-                min_word = y_translations.numbers;
-            }
-            let msg = y_translations.minimum + ' ' + min + ' ' + min_word;
-            const placeholder = get_placeholder(field);
-            if (placeholder) {
-                msg = placeholder + ': ' + msg;
-            }
-            y_add_error_msg(field, msg);
-            return false;
-        } else {
-            y_remove_error_msg(field);
-        }
-    }
-    return true;
-}
-
-// Remove error message
 function y_remove_error_msg(self) {
     let target = self;
     if (!target.classList.contains('wpcf7-validates-as-required') && target.closest('.wpcf7-validates-as-required')) {
         target = target.closest('.wpcf7-validates-as-required');
     }
-    
     target.classList.remove('error');
     const nextEl = target.nextElementSibling;
-    if (nextEl && nextEl.classList.contains('label-error')) {
-        nextEl.remove();
-    }
+    if (nextEl && nextEl.classList.contains('label-error')) nextEl.remove();
 }
 
-// Add error message
 function y_add_error_msg(self, msg) {
     let target = self;
-    // Adjust target if inside a wpcf7 wrapper
     if (!target.classList.contains('wpcf7-validates-as-required') && target.closest('.wpcf7-validates-as-required')) {
         target = target.closest('.wpcf7-validates-as-required');
     }
-
     const nextEl = target.nextElementSibling;
     if (nextEl && nextEl.classList.contains('label-error')) {
-        target.classList.add('error');
         nextEl.textContent = msg;
         nextEl.style.display = 'block';
     } else {
-        let forid = '';
-        const inner_input = target.querySelector('input');
+        const inputForId = target.querySelector('input') || target;
+        if (!inputForId.getAttribute('id')) inputForId.setAttribute('id', y_new_input_id({input: inputForId}));
         
-        let idHolder = inner_input ? inner_input : target;
-        
-        if (!idHolder.getAttribute('id')) {
-            const newID = y_new_input_id({
-                input: idHolder
-            });
-            idHolder.setAttribute('id', newID);
-        }
-        forid = 'for="' + idHolder.getAttribute('id') + '"';
-
+        const forid = 'for="' + inputForId.getAttribute('id') + '"';
         target.classList.add('error');
-        
         const html = target.closest('label') 
             ? `<div ${forid} class="label-error error" style="display:block;">${msg}</div>`
             : `<label ${forid} class="label-error error" style="display:block;">${msg}</label>`;
-            
         target.insertAdjacentHTML('afterend', html);
     }
 }
 
 function y_new_input_id(obj) {
-    let name = obj.input.getAttribute('name');
-    if (!name) name = 'input'; // Fallback if no name
-    let newID = name.replace(/[^a-zA-Z\-\_]/g, '');
-    let num = obj.num ? obj.num + 1 : 1;
-    newID = newID + num;
-
-    if (document.getElementById(newID)) {
-        return y_new_input_id({
-            input: obj.input,
-            num: num
-        });
-    }
+    let name = obj.input.getAttribute('name') || 'input';
+    let newID = name.replace(/[^a-zA-Z\-\_]/g, '') + (obj.num ? obj.num + 1 : 1);
+    if (document.getElementById(newID)) return y_new_input_id({ input: obj.input, num: (obj.num || 1) });
     return newID;
 }
 
-// is Israeli Mobile Number
 function isIsraeliMobileNumber(field) {
     let phone_val = field.value.replace(/\D/g, '');
-
-    if (phone_val.startsWith('972')) {
-        phone_val = '0' + phone_val.slice(3);
-    }
+    if (phone_val.startsWith('972')) phone_val = '0' + phone_val.slice(3);
 
     if (phone_val.length && field.classList.contains('cell') && !/^05[0-9]{8}$/.test(phone_val)) {
         let msg = y_translations.cell;
         const placeholder = get_placeholder(field);
-        if (placeholder) {
-            msg = placeholder + ': ' + msg;
-        }
+        if (placeholder) msg = placeholder + ': ' + msg;
         y_add_error_msg(field, msg);
         return false;
-    } else {
-        y_remove_error_msg(field);
     }
+    y_remove_error_msg(field);
     return true;
 }
 
-// Disable cf7 validation
 document.addEventListener('wpcf7submit', function(event) {
     if(event.detail && event.detail.apiResponse){
         event.detail.apiResponse.invalid_fields = [];
