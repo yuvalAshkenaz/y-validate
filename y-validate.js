@@ -385,3 +385,43 @@ document.addEventListener('wpcf7submit', function(event) {
         event.detail.apiResponse.invalid_fields = [];
     }
 });
+
+// --- Automatic AJAX Tracking ---
+
+const originalFetch = window.fetch;
+const originalOpen = XMLHttpRequest.prototype.open;
+const originalSend = XMLHttpRequest.prototype.send;
+
+// Track active forms that are currently in "Loading" state
+let activeLoadingForms = new Set();
+
+// Intercept Fetch
+window.fetch = async function(...args) {
+    const response = await originalFetch(...args);
+    // Use a small timeout to ensure the UI has time to process
+    setTimeout(checkAndResetLoaders, 500);
+    return response;
+};
+
+// Intercept XMLHttpRequest
+XMLHttpRequest.prototype.send = function(...args) {
+    this.addEventListener('loadend', function() {
+        setTimeout(checkAndResetLoaders, 500);
+    });
+    return originalSend.apply(this, args);
+};
+
+// Override y_show_loader to track the form
+const base_y_show_loader = y_show_loader;
+y_show_loader = function(form) {
+    base_y_show_loader(form);
+    activeLoadingForms.add(form);
+};
+
+function checkAndResetLoaders() {
+    activeLoadingForms.forEach(form => {
+        // If the request finished, we assume the AJAX task for this form is done
+        y_hide_loader(form);
+        activeLoadingForms.delete(form);
+    });
+}

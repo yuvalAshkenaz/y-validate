@@ -1,13 +1,13 @@
 <!DOCTYPE HTML>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>y-validate 3.2 | Demo & Documentation</title>
+	<title>y-validate 4.0 | Demo & Documentation</title>
 	
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
 	<style>
 		:root {
@@ -27,7 +27,7 @@
 		* { box-sizing: border-box; }
 		
 		body {
-			font-family: 'Heebo', sans-serif;
+			font-family: 'Inter', sans-serif;
 			background-color: var(--bg-color);
 			color: var(--text-main);
 			margin: 0;
@@ -38,7 +38,7 @@
 		header {
 			background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
 			color: white;
-			padding: 2rem 1rem;
+			padding: 2.5rem 1rem;
 			text-align: center;
 			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 		}
@@ -65,7 +65,7 @@
 
 		@media (min-width: 992px) {
 			.container {
-				grid-template-columns: 1.2fr 0.8fr; /* Docs wider than form */
+				grid-template-columns: 1.2fr 0.8fr;
 				align-items: start;
 			}
 		}
@@ -97,18 +97,18 @@
 		.doc-item:last-child { border-bottom: none; }
 
 		.code-snippet {
-			font-family: arial;
+			font-family: 'Fira Code', monospace;
 			background: #f1f5f9;
 			padding: 0.2rem 0.4rem;
 			border-radius: 4px;
-			color: #d946ef; /* Magenta for tags/attrs */
+			color: #d946ef;
 			font-size: 0.9em;
 			direction: ltr;
 			display: inline-block;
 		}
 
 		.code-block {
-			font-family: arial;
+			font-family: 'Fira Code', monospace;
 			background: var(--code-bg);
 			color: var(--code-text);
 			padding: 1rem;
@@ -175,13 +175,11 @@
 			background-color: var(--primary-hover);
 		}
 
-		/* Validation Specific Overrides (Visual enhancement on top of JS) */
 		input.error {
 			border-color: var(--error) !important;
 			background-color: #fef2f2;
 		}
 		
-		/* Footer */
 		footer {
 			text-align: center;
 			padding: 2rem;
@@ -212,115 +210,118 @@
 
 	<header>
 		<h1>y-validate <span>4.0</span></h1>
-		<p>ספריית ולידציה קלילה ומהירה לטפסים</p>
+		<p>Lightweight & High-Performance Form Validation Library</p>
 	</header>
 
 	<div class="container">
 		
 		<section class="card">
-			<h2>דוקומנטציה ושימוש</h2>
+			<h2>Documentation & Usage</h2>
 			
 			<div class="doc-item">
-				<strong>התקנה (סקריפט)</strong>
+				<strong>Installation</strong>
 				<div class="code-block">
-&lt;script src="https://cdn.jsdelivr.net/gh/yuvalAshkenaz/y-validate/y-validate.js?lang=he"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/yuvalAshkenaz/y-validate/y-validate.js?lang=en"&gt;&lt;/script&gt;
 				</div>
-				<div class="param-desc">הוסף את הפרמטר <b>lang=he</b> להודעות שגיאה בעברית.</div>
+				<div class="param-desc">Use the <b>lang=en</b> parameter for English error messages.</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>שדה חובה</strong>
+				<strong>Required Field</strong>
 				<div><span class="code-snippet">class="required"</span></div>
-				<div class="param-desc">מוודא שהשדה לא ריק.</div>
+				<div class="param-desc">Ensures the field is not empty.</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>שדה חובה (תואם WP CF7)</strong>
-				<div><span class="code-snippet">class="wpcf7-validates-as-required"</span> <span class="badge badge-wp">Wordpress</span></div>
-				<div class="param-desc">תמיכה מובנית בתוסף Contact Form 7.</div>
+				<strong>Required (WP CF7 Compatible)</strong>
+				<div><span class="code-snippet">class="wpcf7-validates-as-required"</span> <span class="badge badge-wp">WordPress</span></div>
+				<div class="param-desc">Native support for Contact Form 7 classes.</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>אימייל תקין</strong>
-				<div><span class="code-snippet">type="email"</span> או <span class="code-snippet">class="email"</span></div>
-				<div class="param-desc">בודק פורמט אימייל חוקי.</div>
+				<strong>Email Validation</strong>
+				<div><span class="code-snippet">type="email"</span> or <span class="code-snippet">class="email"</span></div>
+				<div class="param-desc">Checks for a valid email format.</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>טלפון נייד ישראלי</strong>
+				<strong>Israeli Mobile Validation</strong>
 				<div><span class="code-snippet">class="cell"</span></div>
-				<div class="param-desc">בודק פורמט 05X-XXXXXXX.</div>
+				<div class="param-desc">Checks for Israeli format (05X-XXXXXXX).</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>אימות סיסמה כפולה</strong>
+				<strong>Password Confirmation</strong>
 				<div><span class="code-snippet">class="password-confirm"</span></div>
-				<div class="param-desc">יש להוסיף את הקלאס לשני שדות הסיסמה. המערכת תבדוק זהות ביניהם.</div>
+				<div class="param-desc">Add this class to both password fields to ensure they match.</div>
 			</div>
 
 			<div class="doc-item">
-				<strong>פונקציות JS שימושיות</strong>
+				<strong>Useful JS API</strong>
 				<div class="code-block">
-// בדיקת תקינות טופס ידנית<br>
+// Manual validation check<br>
 let isValid = y_validate_form( element );<br>
 <br>
-// הוספת הודעת שגיאה ידנית<br>
-y_add_error_msg( field, 'הודעה מותאמת אישית' );<br>
+// Add custom error message<br>
+y_add_error_msg( field, 'Your custom message' );<br>
 <br>
-// הסרת הודעה<br>
+// Remove error message<br>
 y_remove_error_msg( field );<br>
 <br>
-// Callback לאחר יציאה משדה<br>
+// Blur callback function<br>
 function y_blur_after_validate( field ) { ... }
 				</div>
 			</div>
 			
 			<div class="doc-item">
-				<strong>ניהול טעינה (Loader) עבור טפסי AJAX</strong>
+				<strong>Smart AJAX Loader</strong>
 				<div class="code-block">
-// ה-Loader מופעל אוטומטית ברגע שהטופס עובר ולידציה ללא שגיאות.<br>
-// כאשר ה-AJAX מסיים את הפעולה, תוכל להחזיר את הכפתור לקדמותו:<br>
+// NEW in v4.0: Automatic Detection!<br>
+// The loader starts when validation passes and STOPS automatically <br>
+// when your AJAX request (Fetch or XHR) is completed.<br>
+<br>
+// Optional manual override:<br>
 y_hide_loader( form_element );
 				</div>
-				<div class="param-desc">מונע שליחה כפולה ומציג אנימציית טעינה על כפתור השליחה.</div>
+				<div class="param-desc">Prevents double-submissions. No extra code required for most AJAX setups.</div>
 			</div>
 		</section>
 
 		<section class="card">
-			<h2>דוגמה חיה</h2>
+			<h2>Live Demo</h2>
 			<form id="demo-form" novalidate>
 				
 				<div class="form-group">
-					<label>שם מלא (חובה)</label>
-					<input type="text" name="fullname" class="required" placeholder="לדוגמה: ישראל ישראלי">
+					<label>Full Name (Required)</label>
+					<input type="text" name="fullname" class="required" placeholder="e.g. John Doe">
 				</div>
 
 				<div class="form-group">
-					<label>אימייל (חובה + ולידציה)</label>
+					<label>Email (Required + Validation)</label>
 					<input type="email" name="email" class="required" placeholder="name@example.com">
 				</div>
 
 				<div class="form-group">
-					<label>טלפון (מספרים בלבד)</label>
+					<label>Phone (Numbers Only)</label>
 					<input type="tel" name="phone" placeholder="03-1234567">
 				</div>
 
 				<div class="form-group">
-					<label>טלפון נייד (ולידציה ישראלית)</label>
+					<label>Mobile (Israeli Validation)</label>
 					<input type="tel" name="cell" class="required cell" placeholder="05X-XXXXXXX">
 				</div>
 
 				<div class="form-group" style="margin-top: 2rem; border-top: 1px dashed #eee; padding-top: 1rem;">
-					<label>סיסמה</label>
+					<label>Password</label>
 					<input type="password" name="password" class="required password-confirm" placeholder="******">
 				</div>
 
 				<div class="form-group">
-					<label>אימות סיסמה</label>
+					<label>Confirm Password</label>
 					<input type="password" name="confirm-password" class="required password-confirm" placeholder="******">
 				</div>
 
-				<button type="submit">שלח טופס</button>
+				<button type="submit">Submit Form</button>
 			</form>
 		</section>
 
@@ -330,26 +331,26 @@ y_hide_loader( form_element );
 		&copy; 2026 y-validate By Yuval Ashkenazi. All rights reserved.
 	</footer>
 
-	<script type="text/javascript" src="y-validate.js?lang=he"></script>
+	<script type="text/javascript" src="y-validate.js?lang=en"></script>
 	
 	<script>
 		document.getElementById('demo-form').addEventListener('submit', function(e) {
-			// מבטלים את השליחה הרגילה של הדפדפן כדי להדגים AJAX
+			// Prevent default submission to demonstrate AJAX behavior
 			e.preventDefault();
 			
 			const form = this;
 			
-			// בדיקה האם הטופס תקין בעזרת הפונקציה של הספרייה
+			// Validate form using library function
 			if (y_validate_form(form)) {
-				// פונקציית y_show_loader מופעלת אוטומטית על ידי y-validate במאזין הכללי.
-				// מדמים קריאת שרת של 2 שניות
+				// y_show_loader is triggered automatically by the library listener.
+				// Simulate a server delay of 2 seconds
 				setTimeout(function() {
-					alert('הטופס נשלח בהצלחה! (סימולציית AJAX)');
+					alert('Form submitted successfully! (AJAX Simulation)');
 					
-					// הסרת ה-Loader והחזרת הכפתור למצב פעיל
+					// Hide loader and re-enable button
 					y_hide_loader(form);
 					
-					// איפוס הטופס
+					// Reset the form
 					form.reset();
 				}, 2000);
 			}
