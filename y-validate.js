@@ -1,11 +1,11 @@
-/*! y-validate - v3.1 - 05/02/2026
+/*! y-validate - v4.0 - 06/04/2026
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 
 // Inject Styles
 const style = document.createElement('style');
 style.textContent = `
-    input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;}
+    input.error,textarea.error,select.error{color:red!important;border-bottom:1px solid red!important;background-color:#fef2f2;}
     .error::-webkit-input-placeholder{color:red!important;opacity:1;}
     .error:-moz-placeholder{color:red!important;opacity:1;}
     .select2-wrap{position:relative;}
@@ -19,7 +19,31 @@ style.textContent = `
     .wpcf7-checkbox label:not(.label-error){display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;}
     .label-error{width:100%;order:2;}
     .wpcf7-checkbox input{margin:0;}
-    .wpcf7-checkbox .wpcf7-list-item-label{width:-webkit-calc(100% - 30px);width:calc(100% - 30px);}
+	[type="checkbox"]:focus-visible ~ .wpcf7-list-item-label{outline:2px solid #000;}
+    
+    /* Y-Validate Loader CSS */
+    .y-btn-loading {
+        position: relative !important;
+        pointer-events: none !important;
+        color: transparent !important;
+    }
+    .y-btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-top: -10px;
+        margin-left: -10px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: y-spin 0.8s linear infinite;
+    }
+    @keyframes y-spin {
+        to { transform: rotate(360deg); }
+    }
 `;
 document.head.appendChild(style);
 
@@ -68,7 +92,7 @@ function matches(el, selector) {
 
 // Optimized Event Listener for Input (Replaces keyup)
 const handleInputValidation = y_debounce(function(e) {
-    if (matches(e.target, '.required, .wpcf7-validates-as-required')) {
+    if (matches(e.target, '.required, .wpcf7-validates-as-required, [required]')) {
         y_check_req(e.target);
     } else if (matches(e.target, '[type="tel"]')) {
         y_check_if_number(e.target);
@@ -82,7 +106,7 @@ const handleInputValidation = y_debounce(function(e) {
 document.body.addEventListener('input', handleInputValidation);
 
 document.body.addEventListener('change', function(e) {
-    if (matches(e.target, '.required, .wpcf7-validates-as-required')) {
+    if (matches(e.target, '.required, .wpcf7-validates-as-required, [required]')) {
         y_check_req(e.target);
     }
 });
@@ -90,7 +114,7 @@ document.body.addEventListener('change', function(e) {
 // Blur uses passive: true to not block scrolling (though blur doesn't usually block scroll)
 document.body.addEventListener('blur', function(e) {
     const target = e.target;
-    if (matches(target, '.required, .wpcf7-validates-as-required')) {
+    if (matches(target, '.required, .wpcf7-validates-as-required, [required]')) {
         if (target.classList.contains('password-confirm')) {
             y_check_req(target);
         } else {
@@ -118,15 +142,35 @@ document.body.addEventListener('submit', function(e) {
         const valid = y_validate_form(e.target);
         if (!valid) {
             e.preventDefault();
+        } else {
+            y_show_loader(e.target);
         }
     }
 });
+
+// Enabling loading mode on the send button
+function y_show_loader(form) {
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) {
+        submitBtn.classList.add('y-btn-loading');
+        submitBtn.setAttribute('disabled', 'disabled');
+    }
+}
+
+// Turn off loading mode and return the button to normal mode (for AJAX use)
+function y_hide_loader(form) {
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (submitBtn) {
+        submitBtn.classList.remove('y-btn-loading');
+        submitBtn.removeAttribute('disabled');
+    }
+}
 
 // --- Validation Functions (Same logic, cleaner implementation) ---
 
 function y_validate_form(form) {
     let valid = true;
-    let req = form.querySelectorAll('.required, .wpcf7-validates-as-required');
+    let req = form.querySelectorAll('.required, .wpcf7-validates-as-required, [required]');
     if (req.length === 0) return valid;
 
     req.forEach(function(field) {
@@ -203,6 +247,7 @@ function y_password_confirm(field) {
 function y_check_req(field) {
     const isRequired = field.classList.contains('required') || 
                        field.classList.contains('wpcf7-validates-as-required') || 
+                       field.hasAttribute('required') || 
                        field.closest('.required') || 
                        field.closest('.wpcf7-validates-as-required');
 

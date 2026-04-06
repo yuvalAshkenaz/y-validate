@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>y-validate 3.1 | Demo & Documentation</title>
+	<title>y-validate 3.2 | Demo & Documentation</title>
 	
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -97,7 +97,7 @@
 		.doc-item:last-child { border-bottom: none; }
 
 		.code-snippet {
-			font-family: 'Fira Code', monospace;
+			font-family: arial;
 			background: #f1f5f9;
 			padding: 0.2rem 0.4rem;
 			border-radius: 4px;
@@ -108,7 +108,7 @@
 		}
 
 		.code-block {
-			font-family: 'Fira Code', monospace;
+			font-family: arial;
 			background: var(--code-bg);
 			color: var(--code-text);
 			padding: 1rem;
@@ -211,7 +211,7 @@
 <body>
 
 	<header>
-		<h1>y-validate <span>3.1</span></h1>
+		<h1>y-validate <span>4.0</span></h1>
 		<p>ספריית ולידציה קלילה ומהירה לטפסים</p>
 	</header>
 
@@ -223,7 +223,7 @@
 			<div class="doc-item">
 				<strong>התקנה (סקריפט)</strong>
 				<div class="code-block">
-&lt;script src="y-validate.js?lang=he"&gt;&lt;/script&gt;
+&lt;script src="https://cdn.jsdelivr.net/gh/yuvalAshkenaz/y-validate/y-validate.js?lang=he"&gt;&lt;/script&gt;
 				</div>
 				<div class="param-desc">הוסף את הפרמטר <b>lang=he</b> להודעות שגיאה בעברית.</div>
 			</div>
@@ -262,7 +262,7 @@
 				<strong>פונקציות JS שימושיות</strong>
 				<div class="code-block">
 // בדיקת תקינות טופס ידנית<br>
-let isValid = y_validate_form( form );<br>
+let isValid = y_validate_form( element );<br>
 <br>
 // הוספת הודעת שגיאה ידנית<br>
 y_add_error_msg( field, 'הודעה מותאמת אישית' );<br>
@@ -273,6 +273,16 @@ y_remove_error_msg( field );<br>
 // Callback לאחר יציאה משדה<br>
 function y_blur_after_validate( field ) { ... }
 				</div>
+			</div>
+			
+			<div class="doc-item">
+				<strong>ניהול טעינה (Loader) עבור טפסי AJAX</strong>
+				<div class="code-block">
+// ה-Loader מופעל אוטומטית ברגע שהטופס עובר ולידציה ללא שגיאות.<br>
+// כאשר ה-AJAX מסיים את הפעולה, תוכל להחזיר את הכפתור לקדמותו:<br>
+y_hide_loader( form_element );
+				</div>
+				<div class="param-desc">מונע שליחה כפולה ומציג אנימציית טעינה על כפתור השליחה.</div>
 			</div>
 		</section>
 
@@ -317,10 +327,34 @@ function y_blur_after_validate( field ) { ... }
 	</div>
 
 	<footer>
-		&copy; 2025 y-validate By Yuval Ashkenazi. All rights reserved.
+		&copy; 2026 y-validate By Yuval Ashkenazi. All rights reserved.
 	</footer>
 
 	<script type="text/javascript" src="y-validate.js?lang=he"></script>
+	
+	<script>
+		document.getElementById('demo-form').addEventListener('submit', function(e) {
+			// מבטלים את השליחה הרגילה של הדפדפן כדי להדגים AJAX
+			e.preventDefault();
+			
+			const form = this;
+			
+			// בדיקה האם הטופס תקין בעזרת הפונקציה של הספרייה
+			if (y_validate_form(form)) {
+				// פונקציית y_show_loader מופעלת אוטומטית על ידי y-validate במאזין הכללי.
+				// מדמים קריאת שרת של 2 שניות
+				setTimeout(function() {
+					alert('הטופס נשלח בהצלחה! (סימולציית AJAX)');
+					
+					// הסרת ה-Loader והחזרת הכפתור למצב פעיל
+					y_hide_loader(form);
+					
+					// איפוס הטופס
+					form.reset();
+				}, 2000);
+			}
+		});
+	</script>
 
 </body>
 </html>
