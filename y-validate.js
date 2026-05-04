@@ -1,50 +1,50 @@
-/*! y-validate - v4.1 - 23/04/2026
+/*! y-validate - v4.3 - 04/05/2026
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 
 // Inject Styles
 const style = document.createElement('style');
 style.textContent = `
-	input.error, textarea.error, select.error { color: var(--error-text-color, red) !important; border-bottom: 1px solid var(--error-border-color, red) !important; background-color: var(--error-bg-color, #fef2f2); }
-	.error::-webkit-input-placeholder { color: var(--error-text-color, red) !important; opacity: 1; }
-	.error:-moz-placeholder { color: var(--error-text-color, red) !important; opacity: 1; }
-	.select2-wrap { position: relative; }
-	.select2.error + .label-error { position: absolute; bottom: 0; }
-	.select2.error ~ .select2-container { margin-bottom: 24px; }
-	.select2.error ~ .select2-container .select2-selection { border-bottom-color: var(--error-border-color, red); }
-	.select2.error ~ .select2-container .select2-selection__rendered { color: var(--error-text-color, red); }
-	input[type="checkbox"].error ~ span { color: var(--error-text-color, red); }
-	.wpcf7-not-valid-tip { color: var(--error-text-color, red); font-size: 14px; }
-	.label-error { color: var(--error-label-color, red); font-size: 14px; }
-	label:not(.label-error).wpcf7-not-valid-tip ~ .wpcf7-not-valid-tip, .label-error ~ .wpcf7-not-valid-tip { display: none; }
-	.wpcf7-checkbox label:not(.label-error) { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
-	.label-error { width: 100%; order: 2; }
-	.wpcf7-checkbox input { margin: 0; }
-	[type="checkbox"]:focus-visible ~ .wpcf7-list-item-label { outline: 2px solid #000; }
-    
-    /* Y-Validate Loader CSS */
-    .y-btn-loading {
-        position: relative !important;
-        pointer-events: none !important;
-        color: transparent !important;
-    }
-    .y-btn-loading::after {
-        content: '';
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        top: 50%;
-        left: 50%;
-        margin-top: -10px;
-        margin-left: -10px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #ffffff;
-        border-radius: 50%;
-        animation: y-spin 0.8s linear infinite;
-    }
-    @keyframes y-spin {
-        to { transform: rotate(360deg); }
-    }
+input.error,textarea.error,select.error{color:var(--error-text-color,red)!important;border-color:var(--error-border-color,red)!important;background-color:var(--error-bg-color,#fef2f2)!important;}
+.error::-webkit-input-placeholder{color:var(--error-text-color,red)!important;opacity:var(--error-placeholder-opacity,1);}
+.error:-moz-placeholder{color:var(--error-text-color,red)!important;opacity:var(--error-placeholder-opacity,1);}
+.select2-wrap{position:var(--select2-wrap-position,relative);}
+.select2.error+.label-error{position:var(--select2-label-error-position,absolute);bottom:var(--select2-label-error-bottom,0);}
+.select2.error~.select2-container{margin-bottom:var(--select2-error-margin-bottom,24px);}
+.select2.error~.select2-container .select2-selection{border-bottom-color:var(--error-border-color,red);}
+.select2.error~.select2-container .select2-selection__rendered{color:var(--error-text-color,red);}
+input[type="checkbox"].error~span{color:var(--error-text-color,red);}
+.wpcf7-not-valid-tip{color:var(--error-text-color,red);font-size:var(--error-font-size,14px);}
+.label-error{color:var(--error-label-color,red);font-size:var(--error-label-font-size,14px);}
+label:not(.label-error).wpcf7-not-valid-tip~.wpcf7-not-valid-tip,.label-error~.wpcf7-not-valid-tip{display:var(--error-tip-display,none);}
+.wpcf7-checkbox label:not(.label-error){display:var(--checkbox-label-display,flex);flex-wrap:var(--checkbox-label-wrap,wrap);gap:var(--checkbox-label-gap,8px);align-items:var(--checkbox-label-align,flex-start);}
+.label-error{width:var(--label-error-width,100%);order:var(--label-error-order,2);}
+.wpcf7-checkbox input{margin:var(--checkbox-input-margin,0);}
+[type="checkbox"]:focus-visible~.wpcf7-list-item-label{outline:var(--wpcf7-checkbox-label-outline-width,2px) var(--wpcf7-checkbox-label-outline-style,solid) var(--wpcf7-checkbox-label-outline-color,#000);}
+
+/* Y-Validate Loader CSS */
+.y-btn-loading {
+	position: relative !important;
+	pointer-events: none !important;
+	color: transparent !important;
+}
+.y-btn-loading::after {
+	content: '';
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	top: 50%;
+	left: 50%;
+	margin-top: -10px;
+	margin-left: -10px;
+	border: 3px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #ffffff;
+	border-radius: 50%;
+	animation: y-spin 0.8s linear infinite;
+}
+@keyframes y-spin {
+	to { transform: rotate(360deg); }
+}
 `;
 document.head.appendChild(style);
 
