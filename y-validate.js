@@ -1,4 +1,4 @@
-/*! y-validate - v4.3 - 04/05/2026
+/*! y-validate - v4.4 - 05/05/2026
 * By Yuval Ashkenazi
 * https://github.com/yuvalAshkenaz/y-validate */
 
@@ -151,7 +151,7 @@ document.body.addEventListener('submit', function(e) {
 
 // Enabling loading mode on the send button
 function y_show_loader(form) {
-    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    const submitBtn = form.querySelector('button[type="submit"].y-has-loader, input[type="submit"].y-has-loader');
     if (submitBtn) {
         submitBtn.classList.add('y-btn-loading');
         submitBtn.setAttribute('disabled', 'disabled');
@@ -160,7 +160,7 @@ function y_show_loader(form) {
 
 // Turn off loading mode and return the button to normal mode (for AJAX use)
 function y_hide_loader(form) {
-    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+    const submitBtn = form.querySelector('button[type="submit"].y-has-loader, input[type="submit"].y-has-loader');
     if (submitBtn) {
         submitBtn.classList.remove('y-btn-loading');
         submitBtn.removeAttribute('disabled');
