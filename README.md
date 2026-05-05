@@ -1,4 +1,4 @@
-# y-validate v4.3
+# y-validate v4.4
 
 A high-performance, zero-dependency Vanilla JS form validation library. Version 4.0 introduces Smart AJAX Detection, automatically managing loading states without requiring extra code from the developer.
 
@@ -27,12 +27,14 @@ Add the script before your closing body tag:
 | Israeli Mobile | class="cell" | Validates 05X-XXXXXXX formats. |
 | Passwords | class="password-confirm" | Ensures two password fields match. |
 | Min Length | minlength="X" | Enforces a minimum character count. |
+| Submit Loader | class="y-has-loader" | Enables the automatic loading animation on the submit button. |
 
 ## 🔄 Smart AJAX Loader
 
-In version 4.0, the library intercepts network requests. When a form is submitted and valid:
-1. The submit button is automatically disabled and shows a spinner.
-2. The loader is removed automatically as soon as your AJAX request (Fetch or XHR) finishes.
+<p>The library intercepts network requests to prevent double-submissions and provide visual feedback.</p>
+<p>To enable this feature, <b>you must add the <code>y-has-loader</code> class to your form's submit button</b>.</p>
+<p>When a form is submitted and valid:</p>
+<ol start="1" data-path-to-node="7"><li><p data-path-to-node="7,0,0">The submit button (with the <code data-path-to-node="7,0,0" data-index-in-node="28">y-has-loader</code> class) is automatically disabled and shows a spinner.</p></li><li><p data-path-to-node="7,1,0">The loader is removed automatically as soon as your AJAX request (Fetch or XHR) finishes.</p></li></ol>
 
 Manual Override:
 If you need to manually stop the loading state, use: y_hide_loader(formElement);
