@@ -3,7 +3,7 @@
 A high-performance, zero-dependency Vanilla JS form validation library. Version 4.0 introduces Smart AJAX Detection, automatically managing loading states without requiring extra code from the developer.
 
 ## 🔗 Live Demo
-Check out the library in action: [https://y-tools.dooble.us/y-validate/demo.html](https://y-tools.dooble.us/y-validate/demo.html)
+Check out the library in action: [https://y-tools.dooble.us/y-validate/demo.html](https://y-tools.dooble.us/yvalidate/)
 
 ## ✨ Key Features
 
