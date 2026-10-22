@@ -5,8 +5,6 @@ It validates required fields, email, phone numbers, minimum length and password 
 
 > 🚀 **Live Demo:** [Check out the demo here](https://y-tools.dooble.us/yvalidate/)
 
-> Files: `yvalidate.js` (the library), `demo.html` / `index.php` + `demo.css` (demo and documentation page).
-
 ---
 
 ## ✨ Key Features
