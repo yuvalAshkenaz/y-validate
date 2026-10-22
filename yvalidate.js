@@ -1,0 +1,408 @@
+/*! y-validate - v4.7.1 - 22/10/2026
+* By Yuval Ashkenazi
+* https://github.com/yuvalAshkenaz/y-validate */
+
+// Inject Styles
+const style = document.createElement('style');
+style.textContent = `
+input.wpcf7-not-valid,textarea.wpcf7-not-valid,select.wpcf7-not-valid,input.error,textarea.error,select.error{color:var(--error-text-color,red)!important;border-color:var(--error-border-color,red)!important;background-color:var(--error-bg-color,#fef2f2)!important;}
+.error::-webkit-input-placeholder{color:var(--error-text-color,red)!important;opacity:var(--error-placeholder-opacity,1);}
+.error:-moz-placeholder{color:var(--error-text-color,red)!important;opacity:var(--error-placeholder-opacity,1);}
+.select2-wrap{position:var(--select2-wrap-position,relative);}
+.select2.error+.label-error{position:var(--select2-label-error-position,absolute);bottom:var(--select2-label-error-bottom,0);}
+.select2.error~.select2-container{margin-bottom:var(--select2-error-margin-bottom,24px);}
+.select2.error~.select2-container .select2-selection{border-bottom-color:var(--error-border-color,red);}
+.select2.error~.select2-container .select2-selection__rendered{color:var(--error-text-color,red);}
+input[type="checkbox"].error~span{color:var(--error-text-color,red);}
+.wpcf7-not-valid-tip,.custom-error-tip{color:var(--error-label-color,red);font-size:var(--error-font-size,14px);}
+.label-error{color:var(--error-label-color,red);font-size:var(--error-label-font-size,14px);}
+label:not(.label-error).wpcf7-not-valid-tip~.wpcf7-not-valid-tip,label:not(.label-error).custom-error-tip~.custom-error-tip,.label-error~.wpcf7-not-valid-tip,.label-error~.custom-error-tip{display:var(--error-tip-display,none);}
+.wpcf7-checkbox label:not(.label-error){display:var(--checkbox-label-display,flex);flex-wrap:var(--checkbox-label-wrap,wrap);gap:var(--checkbox-label-gap,8px);align-items:var(--checkbox-label-align,flex-start);}
+.label-error{width:var(--label-error-width,100%);order:var(--label-error-order,2);}
+.wpcf7-checkbox input{margin:var(--checkbox-input-margin,0);}
+[type="checkbox"]:focus-visible~.wpcf7-list-item-label{outline:var(--wpcf7-checkbox-label-outline-width,2px) var(--wpcf7-checkbox-label-outline-style,solid) var(--wpcf7-checkbox-label-outline-color,#000);}
+
+/* Y-Validate Loader CSS */
+.y-btn-loading {
+	position: relative !important;
+	pointer-events: none !important;
+	color: transparent !important;
+}
+.y-btn-loading::after {
+	content: '';
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	top: 50%;
+	left: 50%;
+	margin-top: -10px;
+	margin-left: -10px;
+	border: 3px solid rgba(255, 255, 255, 0.3);
+	border-top-color: #ffffff;
+	border-radius: 50%;
+	animation: y-spin 0.8s linear infinite;
+}
+@keyframes y-spin {
+	to { transform: rotate(360deg); }
+}
+`;
+document.head.appendChild(style);
+
+// Helper: Debounce function to improve INP
+function y_debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Translations Setup
+let yLang = null;
+try {
+    yLang = new URL(document.currentScript.src).searchParams.get("lang");
+} catch (e) {}
+if (!yLang) yLang = document.documentElement.getAttribute('lang') || '';
+let y_translations = {
+    cell: 'Invalid mobile number',
+    invalid_email: 'Invalid email',
+    passwords_not_match: 'Passwords not match',
+    required_field: 'Required field',
+    minimum: 'Minimum',
+    letters: 'letters',
+    numbers: 'numbers',
+    numbers_only: 'Numbers only',
+    is: 'is'
+};
+
+if (/^he([-_]|$)/i.test(yLang)) {
+    yLang = 'he';
+    y_translations = {
+        cell: 'מספר טלפון נייד לא תקין',
+        invalid_email: 'דוא"ל לא תקין',
+        passwords_not_match: 'הסיסמאות לא תואמות',
+        required_field: 'שדה חובה',
+        minimum: 'מינימום',
+        letters: 'אותיות',
+        numbers: 'מספרים',
+        numbers_only: 'מספרים בלבד',
+        is: 'הינו'
+    };
+}
+
+function matches(el, selector) {
+    return el.matches && el.matches(selector);
+}
+
+// Optimized Event Listener for Input (Replaces keyup)
+const handleInputValidation = y_debounce(function(e) {
+    if (matches(e.target, '.required, .wpcf7-validates-as-required, [required]')) {
+        y_check_req(e.target);
+    } else if (matches(e.target, '[type="tel"]')) {
+        y_check_if_number(e.target);
+    } else if (matches(e.target, '.cell')) {
+        isIsraeliMobileNumber(e.target);
+    } else if (matches(e.target, '[minlength]')) {
+        y_check_minlength(e.target);
+    }
+}, 300); // 300ms delay to unblock main thread
+
+document.body.addEventListener('input', handleInputValidation);
+
+document.body.addEventListener('change', function(e) {
+    if (matches(e.target, '.required, .wpcf7-validates-as-required, [required]')) {
+        y_check_req(e.target);
+    }
+});
+
+// Blur uses passive: true to not block scrolling (though blur doesn't usually block scroll)
+document.body.addEventListener('blur', function(e) {
+    const target = e.target;
+    if (matches(target, '.required, .wpcf7-validates-as-required, [required]')) {
+        if (target.classList.contains('password-confirm')) {
+            y_check_req(target);
+        } else {
+            y_validate_field(target, 'blur', function(field) {
+                if (typeof y_blur_after_validate === 'function') {
+                    y_blur_after_validate(field);
+                }
+            });
+        }
+    } else if (matches(target, '.password-confirm')) {
+        if (target.value !== '') {
+            y_password_confirm(target);
+        }
+    } else if (matches(target, '[type="email"]')) {
+        y_check_email(target);
+    } else if (matches(target, '[type="tel"]')) {
+        y_check_if_number(target);
+    } else if (matches(target, '.cell')) {
+        isIsraeliMobileNumber(target);
+    }
+}, true);
+
+document.body.addEventListener('submit', function(e) {
+    if (e.target.tagName === 'FORM') {
+        const valid = y_validate_form(e.target);
+        if (!valid) {
+            e.preventDefault();
+        } else {
+            y_show_loader(e.target);
+        }
+    }
+});
+
+// Enabling loading mode on the send button
+function y_show_loader(form) {
+    const submitBtn = form.querySelector('button[type="submit"].y-has-loader, input[type="submit"].y-has-loader');
+    
+    if (submitBtn) {
+        // בדיקה אם קיים ספינר של Contact Form 7 ליד הכפתור (באותה עטיפה)
+        const hasCf7Spinner = submitBtn.parentElement.querySelector('.wpcf7-spinner');
+        
+        if (!hasCf7Spinner) {
+            submitBtn.classList.add('y-btn-loading');
+            submitBtn.setAttribute('disabled', 'disabled');
+        }
+    }
+}
+
+// Turn off loading mode and return the button to normal mode (for AJAX use)
+function y_hide_loader(form) {
+    const submitBtn = form.querySelector('button[type="submit"].y-has-loader, input[type="submit"].y-has-loader');
+    
+    if (submitBtn) {
+        const hasCf7Spinner = submitBtn.parentElement.querySelector('.wpcf7-spinner');
+        
+        if (!hasCf7Spinner) {
+            submitBtn.classList.remove('y-btn-loading');
+            submitBtn.removeAttribute('disabled');
+        }
+    }
+}
+
+// --- Validation Functions (Same logic, cleaner implementation) ---
+
+function y_validate_form(form) {
+    let valid = true;
+    let req = form.querySelectorAll('.required, .wpcf7-validates-as-required, [required]');
+    if (req.length === 0) return valid;
+
+    req.forEach(function(field) {
+        const isValid = y_validate_field(field, 'submit');
+        if (!isValid) valid = false;
+    });
+
+    if (!valid) {
+        const firstError = form.querySelector('.error');
+        if (firstError) firstError.focus();
+    }
+    return valid;
+}
+
+function get_placeholder(field) {
+    const placeholder = field.getAttribute('placeholder') || field.getAttribute('data-default-placeholder');
+    if (placeholder) return placeholder;
+    if (field.tagName === 'SELECT') {
+        const firstOption = field.querySelector('option');
+        return firstOption ? firstOption.textContent.trim() : null;
+    }
+    return null;
+}
+
+function y_validate_field(field, function_type, callback) {
+    if (!field) return false;
+    // Chain validation checks
+    if (!y_check_req(field)) return runCallback(field, callback, false);
+    if (!y_check_if_number(field)) return runCallback(field, callback, false);
+    if (!isIsraeliMobileNumber(field)) return runCallback(field, callback, false);
+    if (!y_check_email(field)) return runCallback(field, callback, false);
+    if (!y_check_minlength(field)) return runCallback(field, callback, false);
+    if (!y_password_confirm(field)) return runCallback(field, callback, false);
+
+    return runCallback(field, callback, true);
+}
+
+function runCallback(field, callback, result) {
+    if (callback && typeof callback === 'function') callback(field);
+    return result;
+}
+
+function y_check_email(field) {
+    if (field.value !== '' && (field.getAttribute('type') === 'email' || field.classList.contains('email'))) {
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+            y_remove_error_msg(field);
+        } else {
+            let msg = y_translations.invalid_email;
+            const placeholder = get_placeholder(field);
+            if (placeholder) msg = placeholder + ': ' + msg;
+            y_add_error_msg(field, msg);
+            return false;
+        }
+    }
+    return true;
+}
+
+function y_password_confirm(field) {
+    if (field.classList.contains('password-confirm')) {
+        const form = field.closest('form');
+        const confirm_fields = form.querySelectorAll('.password-confirm');
+        let filled = 0;
+        confirm_fields.forEach(el => { if(el.value.length) filled++; });
+
+        if (filled > 1) {
+            let otherField = null;
+            confirm_fields.forEach(el => { if(el !== field) otherField = el; });
+
+            if (otherField && field.value !== otherField.value) {
+                confirm_fields.forEach(el => y_add_error_msg(el, y_translations.passwords_not_match));
+                return false;
+            } else {
+                confirm_fields.forEach(el => y_remove_error_msg(el));
+            }
+        }
+    }
+    return true;
+}
+
+function y_check_req(field) {
+    const isRequired = field.classList.contains('required') || 
+                       field.classList.contains('wpcf7-validates-as-required') || 
+                       field.hasAttribute('required') || 
+                       field.closest('.required') || 
+                       field.closest('.wpcf7-validates-as-required');
+
+    if (isRequired) {
+        let targetField = field;
+        if (!targetField.getAttribute('type')) {
+            const innerInput = targetField.querySelector('[type]');
+            if (innerInput) targetField = innerInput;
+        }
+        
+        const type = targetField.getAttribute('type');
+        let radioCheckboxEmpty = false;
+
+        if (type === 'radio' || type === 'checkbox') {
+            const name = targetField.getAttribute('name');
+            const inputs = document.querySelectorAll(`input[name="${name}"]`);
+            radioCheckboxEmpty = !Array.from(inputs).some(i => i.checked);
+            
+            if (!radioCheckboxEmpty) {
+                 inputs.forEach(input => {
+                    input.classList.remove('error');
+                    // Remove label errors safely
+                    const sibling = input.nextElementSibling;
+                    if(sibling && sibling.classList.contains('label-error')) sibling.remove();
+                 });
+            }
+        }
+
+        let hasSiblingError = false;
+        if (targetField.parentNode) {
+            hasSiblingError = Array.from(targetField.parentNode.children).some(
+                child => child !== targetField && (child.classList.contains('wpcf7-not-valid-tip') || child.classList.contains('custom-error-tip'))
+            );
+        }
+
+        if (radioCheckboxEmpty || targetField.value.trim() === '' || hasSiblingError) {
+            if (!hasSiblingError) {
+                let msg = y_translations.required_field;
+                const placeholder = get_placeholder(targetField);
+                if (placeholder) msg = placeholder + ' ' + y_translations.is + ' ' + msg;
+                y_add_error_msg(targetField, msg);
+            }
+            return false;
+        } else {
+            y_remove_error_msg(targetField);
+        }
+    }
+    return true;
+}
+
+function y_check_if_number(field) {
+    if (field.getAttribute('type') === 'tel' && /[^0-9]/.test(field.value)) {
+        let msg = y_translations.numbers_only;
+        const placeholder = get_placeholder(field);
+        if (placeholder) msg = placeholder + ': ' + msg;
+        y_add_error_msg(field, msg);
+        return false;
+    }
+    y_remove_error_msg(field);
+    return true;
+}
+
+function y_check_minlength(field) {
+    if (field.hasAttribute('minlength')) {
+        const min = parseInt(field.getAttribute('minlength'), 10);
+        if (field.value.length > 0 && field.value.length < min) {
+            let min_word = (field.getAttribute('type') === 'tel') ? y_translations.numbers : y_translations.letters;
+            let msg = y_translations.minimum + ' ' + min + ' ' + min_word;
+            const placeholder = get_placeholder(field);
+            if (placeholder) msg = placeholder + ': ' + msg;
+            y_add_error_msg(field, msg);
+            return false;
+        }
+        y_remove_error_msg(field);
+    }
+    return true;
+}
+
+function y_remove_error_msg(self) {
+    let target = self;
+    if (!target.classList.contains('wpcf7-validates-as-required') && target.closest('.wpcf7-validates-as-required')) {
+        target = target.closest('.wpcf7-validates-as-required');
+    }
+    target.classList.remove('error');
+    const nextEl = target.nextElementSibling;
+    if (nextEl && nextEl.classList.contains('label-error')) nextEl.remove();
+}
+
+function y_add_error_msg(self, msg) {
+    let target = self;
+    if (!target.classList.contains('wpcf7-validates-as-required') && target.closest('.wpcf7-validates-as-required')) {
+        target = target.closest('.wpcf7-validates-as-required');
+    }
+    const nextEl = target.nextElementSibling;
+    if (nextEl && nextEl.classList.contains('label-error')) {
+        nextEl.textContent = msg;
+        nextEl.style.display = 'block';
+    } else {
+        const inputForId = target.querySelector('input') || target;
+        if (!inputForId.getAttribute('id')) inputForId.setAttribute('id', y_new_input_id({input: inputForId}));
+        
+        const forid = 'for="' + inputForId.getAttribute('id') + '"';
+        target.classList.add('error');
+        const html = target.closest('label') 
+            ? `<div ${forid} class="label-error error" style="display:block;">${msg}</div>`
+            : `<label ${forid} class="label-error error" style="display:block;">${msg}</label>`;
+        target.insertAdjacentHTML('afterend', html);
+    }
+}
+
+function y_new_input_id(obj) {
+    let name = obj.input.getAttribute('name') || 'input';
+    let newID = name.replace(/[^a-zA-Z\-\_]/g, '') + (obj.num ? obj.num + 1 : 1);
+    if (document.getElementById(newID)) return y_new_input_id({ input: obj.input, num: (obj.num || 1) });
+    return newID;
+}
+
+function isIsraeliMobileNumber(field) {
+    let phone_val = field.value.replace(/\D/g, '');
+    if (phone_val.startsWith('972')) phone_val = '0' + phone_val.slice(3);
+
+    if (phone_val.length && field.classList.contains('cell') && !/^05[0-9]{8}$/.test(phone_val)) {
+        let msg = y_translations.cell;
+        const placeholder = get_placeholder(field);
+        if (placeholder) msg = placeholder + ': ' + msg;
+        y_add_error_msg(field, msg);
+        return false;
+    }
+    y_remove_error_msg(field);
+    return true;
+}
+
+document.addEventListener('wpcf7submit', function(event) {
+    if(event.detail && event.detail.apiResponse){
+        event.detail.apiResponse.invalid_fields = [];
+    }
+});

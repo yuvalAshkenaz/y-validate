@@ -1,53 +1,132 @@
-# y-validate v4.4
+# y-validate 4.7.1
 
-A high-performance, zero-dependency Vanilla JS form validation library. Version 4.0 introduces Smart AJAX Detection, automatically managing loading states without requiring extra code from the developer.
+**y-validate** is a lightweight, dependency-free form validation library built with **Vanilla JavaScript**.
+It validates required fields, email, phone numbers, minimum length and password confirmation, shows the error message right under the field, and works out of the box with **Contact Form 7**.
 
-## 🔗 Live Demo
-Check out the library in action: [https://y-tools.dooble.us/y-validate/demo.html](https://y-tools.dooble.us/yvalidate/)
+> Files: `yvalidate.js` (the library), `demo.html` / `index.php` + `demo.css` (demo and documentation page).
+
+---
 
 ## ✨ Key Features
 
-- Zero-Config AJAX Loader: Automatically detects fetch or XMLHttpRequest completion to remove the loading state.
-- INP Optimized: Uses a 300ms debounce to ensure validation doesn't block the main thread.
-- Auto-Injected CSS: Styles for errors and loaders are injected automatically.
-- WordPress Ready: Full native support for Contact Form 7 (wpcf7) validation classes.
+- **Zero Dependencies** — pure JavaScript, no jQuery required.
+- **Contact Form 7 compatible** — supports `wpcf7-validates-as-required` and clears the server-side invalid fields so only y-validate messages are shown.
+- **Hebrew & English** — error messages in both languages, language picked automatically (see [Language](#-language)).
+- **Israeli mobile validation** — `class="cell"`.
+- **Submit button loader** — `class="y-has-loader"`, with a manual `y_hide_loader()` for AJAX.
+- **Accessible** — every message is a `label` linked to its field with `for`, and focus moves to the first invalid field on submit.
+- **Fast** — debounced `input` listener (300ms) to keep INP low.
+- **Customizable** — error colors, sizes and the select2 / checkbox layout are controlled with CSS variables.
+
+---
+
+## 🆕 What's New in 4.7.1
+
+- **Language from the page** — the language is now taken from the `lang` attribute of the `<html>` tag (for example `he-IL`) unless the `lang` parameter exists in the script URL.
+- **Wider Hebrew detection** — any `lang` value that starts with `he` (`he`, `he-IL`, `he_IL`, in any letter case) loads the Hebrew messages.
+- **No crash without `document.currentScript`** — when the script is injected dynamically, the library falls back to the `<html lang>` attribute instead of throwing an error.
+- The `?lang=` parameter is no longer required, but it still works and always takes priority.
+
+## 🆕 What's New in 4.7
+
+- **Submit button loader** — `y-has-loader` class with a CSS spinner (`y-btn-loading`) and a `y_hide_loader( form )` function for AJAX forms. The loader is skipped when a Contact Form 7 spinner already exists next to the button.
+- **Better INP** — the `input` handler is debounced and replaces the old `keyup` listener.
+- **Validation helpers** — `y_validate_form`, `y_validate_field`, `y_add_error_msg` and `y_remove_error_msg` are available globally.
+- **`y_blur_after_validate( field )`** — optional callback called after a field is validated on blur.
+
+---
 
 ## 🚀 Installation
 
-Add the script before your closing body tag:
-<script src="y-validate.js?lang=en"></script>
+```html
+<script src="yvalidate.js"></script>
+```
 
-## 🛠️ Validation Rules (Classes & Attributes)
+Load it at the end of the `<body>` (or with `defer`), because the library attaches its listeners to `document.body` when it runs.
 
-| Feature | Class / Attribute | Description |
-| :--- | :--- | :--- |
-| Required | class="required" | Ensures the field is not empty. |
-| Email | type="email" | Validates standard email formats. |
-| Numbers Only | type="tel" | Blocks non-numeric characters. |
-| Israeli Mobile | class="cell" | Validates 05X-XXXXXXX formats. |
-| Passwords | class="password-confirm" | Ensures two password fields match. |
-| Min Length | minlength="X" | Enforces a minimum character count. |
-| Submit Loader | class="y-has-loader" | Enables the automatic loading animation on the submit button. |
+### WordPress
 
-## 🔄 Smart AJAX Loader
-
-<p>The library intercepts network requests to prevent double-submissions and provide visual feedback.</p>
-<p>To enable this feature, <b>you must add the <code>y-has-loader</code> class to your form's submit button</b>.</p>
-<p>When a form is submitted and valid:</p>
-<ol start="1" data-path-to-node="7"><li><p data-path-to-node="7,0,0">The submit button (with the <code data-path-to-node="7,0,0" data-index-in-node="28">y-has-loader</code> class) is automatically disabled and shows a spinner.</p></li><li><p data-path-to-node="7,1,0">The loader is removed automatically as soon as your AJAX request (Fetch or XHR) finishes.</p></li></ol>
-
-Manual Override:
-If you need to manually stop the loading state, use: y_hide_loader(formElement);
-
-## ⚙️ JavaScript API Functions
-
-| Function | Purpose |
-| :--- | :--- |
-| y_validate_form(form) | Validates an entire form manually. Returns true/false. |
-| y_add_error_msg(el, msg) | Manually attaches an error message to a field. |
-| y_remove_error_msg(el) | Manually removes an error message. |
-| y_hide_loader(form) | Manually removes the loading state from the submit button. |
-| y_blur_after_validate | A callback function you can define to run after a field's blur event. |
+```php
+wp_enqueue_script( 'y-validate', get_template_directory_uri() . '/build/js/yvalidate.js', array(), THEME_VER, true );
+```
 
 ---
-Developed by: Yuval Ashkenazi
+
+## 🌐 Language
+
+The library picks the language in this order:
+
+1. The `lang` parameter in the script URL — `yvalidate.js?lang=he` or `yvalidate.js?lang=en`.
+2. The `lang` attribute of the `<html>` tag — `<html lang="he-IL">`.
+3. English, when neither exists.
+
+Any value that starts with `he` loads the Hebrew messages. Any other value loads the English messages.
+
+---
+
+## 📋 Classes & Attributes
+
+| Usage | Description |
+|---|---|
+| `class="required"` / `required` | The field must not be empty. Works with text, textarea, select, radio and checkbox groups. |
+| `class="wpcf7-validates-as-required"` | Contact Form 7 required field. |
+| `type="email"` or `class="email"` | Checks for a valid email format. |
+| `class="cell"` | Israeli mobile number (`05X-XXXXXXX`). A leading `972` is accepted. |
+| `type="tel"` | Numbers only. |
+| `minlength="N"` | Minimum number of characters (or digits for `tel`). |
+| `class="password-confirm"` | Add to both password fields — they must match. |
+| `class="y-has-loader"` | On the submit button — shows a loading spinner after a valid submit and prevents double submissions. |
+
+Messages include the field placeholder when it exists (or the first option of a `select`), for example `Email: Invalid email`.
+
+---
+
+## 🛠 JavaScript API
+
+```js
+// Validate a whole form (returns true / false)
+let isValid = y_validate_form( formElement );
+
+// Validate a single field
+y_validate_field( field );
+
+// Add or remove an error message
+y_add_error_msg( field, 'Your custom message' );
+y_remove_error_msg( field );
+
+// Called after a field is validated on blur
+function y_blur_after_validate( field ) { ... }
+
+// Stop the submit button loader (for AJAX forms)
+y_hide_loader( formElement );
+```
+
+---
+
+## 🎨 Styling with CSS variables
+
+All variables are optional and have a default.
+
+| Variable | Default | Description |
+|---|---|---|
+| `--error-text-color` | `red` | Text color of an invalid field. |
+| `--error-border-color` | `red` | Border color of an invalid field. |
+| `--error-bg-color` | `#fef2f2` | Background of an invalid field. |
+| `--error-placeholder-opacity` | `1` | Placeholder opacity in an invalid field. |
+| `--error-label-color` | `red` | Color of the error message. |
+| `--error-label-font-size` | `14px` | Font size of the error message. |
+| `--error-font-size` | `14px` | Font size of the Contact Form 7 tip. |
+| `--error-tip-display` | `none` | Display of the duplicated Contact Form 7 tips. |
+| `--label-error-width` / `--label-error-order` | `100%` / `2` | Layout of the error message. |
+| `--select2-wrap-position`, `--select2-label-error-position`, `--select2-label-error-bottom`, `--select2-error-margin-bottom` | — | select2 support. |
+| `--checkbox-label-display`, `--checkbox-label-wrap`, `--checkbox-label-gap`, `--checkbox-label-align`, `--checkbox-input-margin` | — | Contact Form 7 checkbox layout. |
+| `--wpcf7-checkbox-label-outline-width` / `-style` / `-color` | `2px` / `solid` / `#000` | Focus outline of a checkbox label. |
+
+The loader is styled with the `.y-btn-loading` class (spinner color: white).
+
+---
+
+## 📝 Changelog
+
+- **4.7.1** — language from `<html lang>` unless the script URL has a `lang` parameter; safer language detection.
+- **4.7** — submit button loader, debounced input validation, `y_blur_after_validate`, `y_hide_loader`.
