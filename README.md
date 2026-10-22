@@ -3,6 +3,8 @@
 **y-validate** is a lightweight, dependency-free form validation library built with **Vanilla JavaScript**.
 It validates required fields, email, phone numbers, minimum length and password confirmation, shows the error message right under the field, and works out of the box with **Contact Form 7**.
 
+> 🚀 **Live Demo:** [Check out the demo here](https://y-tools.dooble.us/yvalidate/)
+
 > Files: `yvalidate.js` (the library), `demo.html` / `index.php` + `demo.css` (demo and documentation page).
 
 ---
